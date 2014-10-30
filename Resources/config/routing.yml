@@ -1,0 +1,3 @@
+laurent_bulletin_controller:
+    resource: "@LaurentBulletinBundle/Controller/BulletinController.php"
+    type:     annotation
