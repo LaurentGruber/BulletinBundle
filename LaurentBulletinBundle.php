@@ -13,9 +13,14 @@ class LaurentBulletinBundle extends PluginBundle
         $config = new ConfigurationBuilder();
         return $config->addRoutingResource(__DIR__.'/Resources/config/routing.yml', null,'bulletin');
     }
+
     public function hasMigrations()
     {
         return true;
+    }
+
+    public function getRequiredFixturesDirectory($env){
+        return 'DataFixtures/Required';
     }
 }
 
