@@ -91,10 +91,11 @@ class BulletinAdminController extends Controller
                 $file = fopen($fichier->getPathname(), 'r');
                 $this->om->startFlushSuite();
 
-                while (($gpmCsv = fgetcsv($file, 0, ";", '"')) !== FALSE && is_array($gpmCsv) && count($gpmCsv) === 3) {
+                while (($gpmCsv = fgetcsv($file, 0, ";", '"')) !== FALSE && is_array($gpmCsv) && count($gpmCsv) === 4) {
                     $groupName = $gpmCsv[0];
                     $matiereName = $gpmCsv[1];
                     $periodeId = $gpmCsv[2];
+                    $ordre = $gpmCsv[3];
 
 
                     if ($this->matiereRepo->findOneByViewName($matiereName)){
@@ -113,6 +114,7 @@ class BulletinAdminController extends Controller
                             $pemp->setMatiere($matiere);
                             $pemp->setTotal($total);
                             $pemp->setPeriode($periode);
+                            $pemp->setPosition($ordre);
 
                             $em->persist($pemp);
                         }

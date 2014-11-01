@@ -60,6 +60,11 @@ class PeriodeEleveMatierePoint
     private $presence;
 
     /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $position;
+
+    /**
      * @param mixed $comportement
      */
     public function setComportement($comportement)
@@ -187,6 +192,20 @@ class PeriodeEleveMatierePoint
         return $this->total;
     }
 
+    /**
+     * @param mixed $position
+     */
+    public function setPosition($position)
+    {
+        $this->position = $position;
+    }
 
+    /**
+     * @return mixed
+     */
+    public function getPosition()
+    {
+        return $this->position;
+    }
 
 }

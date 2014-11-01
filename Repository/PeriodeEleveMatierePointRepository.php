@@ -17,6 +17,7 @@ class PeriodeEleveMatierePointRepository extends EntityRepository
             ->from('Laurent\BulletinBundle\Entity\PeriodeEleveMatierePoint', 'pemp')
             ->where('pemp.periode = :periode')
             ->andWhere('pemp.eleve = :user')
+            ->orderBy('pemp.position')
             ->setParameter('periode', $periode)
             ->setParameter('user', $user);
         $query = $qb->getQuery();
