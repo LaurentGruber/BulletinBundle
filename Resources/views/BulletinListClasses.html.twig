@@ -1,0 +1,10 @@
+{% extends "ClarolineCoreBundle:Workspace:layout.html.twig" %}
+
+{% block section_content %}
+    <h1>Mes Classes</h1>
+    <table class="table">
+    {% for classe in classes %}
+        <tr><td><a href="{{ path ('laurentBulletinListEleve', {'periode' : periode.id(), 'group' : classe.getGroup().id()}) }}">{{ classe.Name }}</a> </td></tr>
+    {% endfor %}
+    </table>
+{% endblock %}

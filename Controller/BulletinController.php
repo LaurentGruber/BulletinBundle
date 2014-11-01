@@ -15,9 +15,11 @@ use Claroline\CoreBundle\Persistence\ObjectManager;
 use Symfony\Component\Security\Core\SecurityContextInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Claroline\CoreBundle\Entity\User;
+use Claroline\CoreBundle\Entity\Group;
 use Laurent\BulletinBundle\Entity\Periode;
 use Laurent\BulletinBundle\Entity\Pemps;
 use Laurent\BulletinBundle\Form\Type\PempsType;
+use Laurent\SchoolBundle\Entity\Classe;
 
 
 class BulletinController extends Controller
@@ -30,6 +32,12 @@ class BulletinController extends Controller
     private $om;
     /** @var PeriodeEleveMatierePointRepository */
     private $pempRepo;
+    /** @var GroupRepository */
+    private $groupRepo;
+    /** @var UserRepository */
+    private $userRepo;
+    /** @var ClassRepository */
+    private $classRepo;
 
     /**
      * @DI\InjectParams({
@@ -57,7 +65,10 @@ class BulletinController extends Controller
         $this->userManager        = $userManager;
         $this->em                 = $em;
         $this->om                 = $om;
-        $this->pempRepo          = $om->getRepository('LaurentBulletinBundle:PeriodeEleveMatierePoint');
+        $this->pempRepo           = $om->getRepository('LaurentBulletinBundle:PeriodeEleveMatierePoint');
+        $this->groupRepo          = $om->getRepository('ClarolineCoreBundle:Group');
+        $this->userRepo           = $om->getRepository('ClarolineCoreBundle:User');
+        $this->classeRepo         = $om->getRepository('LaurentSchoolBundle:Classe');
 
 
     }
@@ -69,6 +80,48 @@ class BulletinController extends Controller
     {
         $this->checkOpen();
         return $this->render('LaurentBulletinBundle::BulletinIndex.html.twig');
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/{periode}/{group}/list/",
+     *     name="laurentBulletinListEleve",
+     *     options = {"expose"=true}
+     * )
+     *
+     *
+     * @param Periode $periode
+     * @param Group $group
+     *
+     *@EXT\Template("LaurentBulletinBundle::BulletinListEleves.html.twig")
+     *
+     * @return array|Response
+     */
+    public function listEleveAction(Periode $periode, Group $group)
+    {
+        $this->checkOpen();
+        $eleves = $this->userRepo->findByGroup($group);
+        return array('periode' => $periode, 'eleves' => $eleves, 'group' => $group);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/{periode}/list/",
+     *     name="laurentBulletinListClasse",
+     *     options = {"expose"=true}
+     * )
+     *
+     * @param Periode $periode
+     *
+     *@EXT\Template("LaurentBulletinBundle::BulletinListClasses.html.twig")
+     *
+     * @return array|Response
+     */
+    public function listClasseAction(Periode $periode)
+    {
+        $this->checkOpen();
+        $classes = $this->classeRepo->findAll();
+        return array('periode' => $periode, 'classes' => $classes);
     }
 
     /**
@@ -118,7 +171,7 @@ class BulletinController extends Controller
            // }
         }
 
-        return array('form' => $form->createView(), 'pemps' => $pemps);
+        return array('form' => $form->createView(), 'eleve' => $eleve);
 
 
     }
