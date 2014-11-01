@@ -1,3 +1,7 @@
 laurent_bulletin_controller:
     resource: "@LaurentBulletinBundle/Controller/BulletinController.php"
     type:     annotation
+
+laurent_bulletin_admin_controller:
+    resource: "@LaurentBulletinBundle/Controller/BulletinAdminController.php"
+    type:     annotation

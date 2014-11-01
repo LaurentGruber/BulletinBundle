@@ -40,6 +40,11 @@ class PeriodeElevePointDiversPoint
     private $eleve;
 
     /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $total;
+
+    /**
      * @ORM\Column(type="float", nullable=true)
      */
     private $point;
@@ -124,6 +129,21 @@ class PeriodeElevePointDiversPoint
         return $this->point;
     }
 
+    /**
+     * @param mixed $total
+     */
+    public function setTotal($total)
+    {
+        $this->total = $total;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTotal()
+    {
+        return $this->total;
+    }
 
 
 }

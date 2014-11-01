@@ -1,0 +1,28 @@
+{% extends "ClarolineCoreBundle:Workspace:layout.html.twig" %}
+
+{% block section_content %}
+   <h1> Bulletin </h1>
+<form action="" method="POST" {{ form_enctype(form) }}>
+    <table class="table">
+        <thead><tr>
+            <th>Matière</th>
+            <th>Point</th>
+            <th>Total</th>
+            <th>Comportement</th>
+            <th>Présence</th>
+        </tr></thead>
+        <tbody>
+        {% for pemp in form.pemps %}
+            <tr>
+                <td>{{ form_widget(pemp.matiere) }}</td>
+                <td>{{ form_widget(pemp.point) }}</td>
+                <td>{{ form_widget(pemp.total) }}</td>
+                <td>{{ form_widget(pemp.comportement) }}</td>
+                <td>{{ form_widget(pemp.presence) }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {{ form_widget(form.save) }}
+
+{% endblock %}

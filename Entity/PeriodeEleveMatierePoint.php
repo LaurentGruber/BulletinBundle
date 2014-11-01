@@ -5,7 +5,7 @@ namespace Laurent\BulletinBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Laurent\BulletinBundle\Repository\PeriodeEleveMatierePointRepository")
  * @ORM\Table(name="laurent_bulletin_periode_eleve_matiere_point")
  */
 class PeriodeEleveMatierePoint
@@ -40,9 +40,40 @@ class PeriodeEleveMatierePoint
     private $eleve;
 
     /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $total;
+
+    /**
      * @ORM\Column(type="float", nullable=true)
      */
     private $point;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $comportement;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $presence;
+
+    /**
+     * @param mixed $comportement
+     */
+    public function setComportement($comportement)
+    {
+        $this->comportement = $comportement;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getComportement()
+    {
+        return $this->comportement;
+    }
 
     /**
      * @param mixed $eleve
@@ -123,5 +154,39 @@ class PeriodeEleveMatierePoint
     {
         return $this->point;
     }
+
+    /**
+     * @param mixed $presence
+     */
+    public function setPresence($presence)
+    {
+        $this->presence = $presence;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPresence()
+    {
+        return $this->presence;
+    }
+
+    /**
+     * @param mixed $total
+     */
+    public function setTotal($total)
+    {
+        $this->total = $total;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTotal()
+    {
+        return $this->total;
+    }
+
+
 
 }
