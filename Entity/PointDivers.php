@@ -95,5 +95,9 @@ class PointDivers{
         return $this->withTotal;
     }
 
+    public function __toString()
+    {
+        return (string) $this->getOfficialName();
+    }
 
 }

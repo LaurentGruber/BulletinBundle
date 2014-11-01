@@ -14,6 +14,7 @@ use Claroline\CoreBundle\Persistence\ObjectManager;
 use Symfony\Component\Security\Core\SecurityContextInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Laurent\BulletinBundle\Entity\PeriodeEleveMatierePoint;
+use Laurent\BulletinBundle\Entity\PeriodeElevePointDiversPoint;
 
 class BulletinAdminController extends Controller
 {
@@ -27,6 +28,8 @@ class BulletinAdminController extends Controller
     private $userRepo;
     /** @var MatiereRepository */
     private $matiereRepo;
+    /** @var MatiereRepository */
+    private $diversRepo;
     private $om;
 
     /**
@@ -56,6 +59,7 @@ class BulletinAdminController extends Controller
         $this->groupRepo          = $om->getRepository('ClarolineCoreBundle:Group');
         $this->userRepo          = $om->getRepository('ClarolineCoreBundle:User');
         $this->matiereRepo        = $om->getRepository('LaurentSchoolBundle:Matiere');
+        $this->diversRepo        = $om->getRepository('LaurentBulletinBundle:PointDivers');
     }
 
     /**
@@ -145,6 +149,88 @@ class BulletinAdminController extends Controller
         return array('form' => $form->createView(),
             'titre' => '',
             'action' => $this->generateUrl('laurentAdminSchoolImportGroupPeriodeMatiere'),
+            'messages' => ''
+        );
+    }
+
+    /**
+     * @EXT\Route("/import/groupPeriodeDivers", name="laurentAdminSchoolImportGroupPeriodeDivers")
+     * @EXT\Template("LaurentBulletinBundle::adminBulletinImportView.html.twig")
+     */
+    public function adminSchoolImportGroupPeriodeDiversAction(Request $request)
+    {
+        $this->checkOpen();
+        $em = $this->get('doctrine')->getManager();
+
+        $form = $this->createFormBuilder()
+            ->add('fichier', 'file', array('label' => 'Fichier CSV'))
+            ->add('envoyer', 'submit', array('attr' => array('class' => 'btn btn-primary')))
+            ->getForm()
+        ;
+
+        if ($request->getMethod() === 'POST') {
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted()) {
+                $messages = array();
+                $fichier = $form->get('fichier')->getNormData();
+                $file = fopen($fichier->getPathname(), 'r');
+                $this->om->startFlushSuite();
+
+                while (($gpmCsv = fgetcsv($file, 0, ";", '"')) !== FALSE && is_array($gpmCsv) && count($gpmCsv) === 5) {
+                    $groupName = $gpmCsv[0];
+                    $diversName = $gpmCsv[1];
+                    $total = $gpmCsv[2];
+                    $periodeId = $gpmCsv[3];
+                    $ordre = $gpmCsv[4];
+
+
+                    if ($this->diversRepo->findOneByName($diversName)){
+
+                        $divers = $this->diversRepo->findOneByName($diversName);
+
+                        $periode = $this->getDoctrine()->getRepository('LaurentBulletinBundle:Periode')->findOneById($periodeId);
+
+                        $group = $this->groupRepo->findOneByName($groupName);
+                        $users = $this->userRepo->findByGroup($group);
+
+                        foreach($users as $user){
+                            $pemd = new PeriodeElevePointDiversPoint();
+                            $pemd->setEleve($user);
+                            $pemd->setDivers($divers);
+                            $pemd->setTotal($total);
+                            $pemd->setPeriode($periode);
+                            $pemd->setPosition($ordre);
+
+                            $em->persist($pemd);
+                        }
+
+                        $messages[] = "<b>Le  $diversName a été ajouté aux élèves du group $groupName pour la période $periodeId.</b>";
+                    }
+
+                    else {
+                        $messages[] = "<b>Le  $diversName n'existe pas il faut d'abord le créer avant de l'ajouter</b>";
+                    }
+
+                }
+
+                $this->om->endFlushSuite();
+
+                fclose($file);
+                $content = $this->renderView('LaurentSchoolBundle::adminSchoolImportView.html.twig',
+                    array('form' => $form->createView(),
+                        'titre' => '',
+                        'action' => $this->generateUrl('laurentAdminSchoolImportGroupPeriodeDivers'),
+                        'messages' => $messages
+                    ));
+
+                return new Response($content);
+
+            }
+        }
+        return array('form' => $form->createView(),
+            'titre' => '',
+            'action' => $this->generateUrl('laurentAdminSchoolImportGroupPeriodeDivers'),
             'messages' => ''
         );
     }

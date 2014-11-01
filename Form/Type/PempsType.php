@@ -2,6 +2,7 @@
 
 namespace Laurent\BulletinBundle\Form\Type;
 
+use Laurent\BulletinBundle\Entity\PeriodeElevePointDiversPoint;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
@@ -10,6 +11,7 @@ class PempsType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options){
         $builder->add('pemps', 'collection', array('type' => new PeriodeEleveMatierePointType()));
+        $builder->add('pemds', 'collection', array('type' => new PeriodeElevePointDiversPointType()));
         $builder->add('save', 'submit', array('label'=>'Enregistrer','attr' => array('class' => 'btn btn-primary')));
         $builder->add('saveAndAdd', 'submit', array('label'=>'Enregistrer','attr' => array('class' => 'btn btn-primary')));
     }

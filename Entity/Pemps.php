@@ -8,9 +8,12 @@ class Pemps
 {
     private $pemps;
 
+    private $pemds;
+
     public function __construct()
     {
         $this->pemps = new ArrayCollection();
+        $this->pemds = new ArrayCollection();
     }
 
     /**
@@ -27,6 +30,22 @@ class Pemps
     public function getPemps()
     {
         return $this->pemps;
+    }
+
+    /**
+     * @param \Laurent\BulletinBundle\Entity\ArrayCollection $pemds
+     */
+    public function setPemds($pemds)
+    {
+        $this->pemps = $pemds;
+    }
+
+    /**
+     * @return \Laurent\BulletinBundle\Entity\ArrayCollection
+     */
+    public function getPemds()
+    {
+        return $this->pemds;
     }
 
 

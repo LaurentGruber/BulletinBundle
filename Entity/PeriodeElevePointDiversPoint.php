@@ -5,7 +5,7 @@ namespace Laurent\BulletinBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Laurent\BulletinBundle\Repository\PeriodeElevePointDiversPointRepository")
  * @ORM\Table(name="laurent_bulletin_periode_eleve_pointdivers_point")
  */
 class PeriodeElevePointDiversPoint
@@ -48,6 +48,11 @@ class PeriodeElevePointDiversPoint
      * @ORM\Column(type="float", nullable=true)
      */
     private $point;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $position;
 
     /**
      * @param mixed $divers
@@ -143,6 +148,22 @@ class PeriodeElevePointDiversPoint
     public function getTotal()
     {
         return $this->total;
+    }
+
+    /**
+     * @param mixed $position
+     */
+    public function setPosition($position)
+    {
+        $this->position = $position;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPosition()
+    {
+        return $this->position;
     }
 
 

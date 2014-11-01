@@ -32,6 +32,8 @@ class BulletinController extends Controller
     private $om;
     /** @var PeriodeEleveMatierePointRepository */
     private $pempRepo;
+    /** @var PeriodeElevePointDiversPointRepository */
+    private $pemdRepo;
     /** @var GroupRepository */
     private $groupRepo;
     /** @var UserRepository */
@@ -66,6 +68,7 @@ class BulletinController extends Controller
         $this->em                 = $em;
         $this->om                 = $om;
         $this->pempRepo           = $om->getRepository('LaurentBulletinBundle:PeriodeEleveMatierePoint');
+        $this->pemdRepo           = $om->getRepository('LaurentBulletinBundle:PeriodeElevePointDiversPoint');
         $this->groupRepo          = $om->getRepository('ClarolineCoreBundle:Group');
         $this->userRepo           = $om->getRepository('ClarolineCoreBundle:User');
         $this->classeRepo         = $om->getRepository('LaurentSchoolBundle:Classe');
@@ -120,7 +123,7 @@ class BulletinController extends Controller
     public function listClasseAction(Periode $periode)
     {
         $this->checkOpen();
-        $classes = $this->classeRepo->findAll();
+        $classes = $this->classRepo->findAll();
         return array('periode' => $periode, 'classes' => $classes);
     }
 
@@ -144,9 +147,13 @@ class BulletinController extends Controller
         $this->checkOpen();
 
         $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
+        $pemds = $this->pemdRepo->findPeriodeElevePointDivers($eleve, $periode);
         $pempCollection = new Pemps;
         foreach ($pemps as $pemp) {
             $pempCollection->getPemps()->add($pemp);
+        }
+        foreach ($pemds as $pemd) {
+            $pempCollection->getPemds()->add($pemd);
         }
 
         $form = $this->createForm(new PempsType, $pempCollection);
