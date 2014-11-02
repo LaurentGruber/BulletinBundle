@@ -15,6 +15,9 @@ use Symfony\Component\Security\Core\SecurityContextInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Laurent\BulletinBundle\Entity\PeriodeEleveMatierePoint;
 use Laurent\BulletinBundle\Entity\PeriodeElevePointDiversPoint;
+use Laurent\BulletinBundle\Entity\Periode;
+use Claroline\CoreBundle\Entity\User;
+use Claroline\CoreBundle\Entity\Group;
 
 class BulletinAdminController extends Controller
 {
@@ -69,6 +72,40 @@ class BulletinAdminController extends Controller
     {
         $this->checkOpen();
         return $this->render('LaurentBulletinBundle::BulletinAdminIndex.html.twig');
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/{periode}/{group}/pdf/",
+     *     name="laurentBulletinPrintPdf",
+     *     options = {"expose"=true}
+     * )
+     *
+     *
+     * @param Periode $periode
+     * @param Group $group
+     *
+     *@EXT\Template("LaurentBulletinBundle::BulletinPrintPdf.html.twig")
+     *
+     * @return array|Response
+     */
+
+    public function PrintPdfAction(Periode $periode, Group $group)
+    {
+        $this->checkOpen();
+        $eleves = $this->userRepo->findByGroup($group);
+        $eleve = 25;
+
+        $pageUrl = $this->generateUrl('laurentBulletinPrintEleve', array('periode' => $periode->getId(), 'eleve' => $eleve), true); // use absolute path!
+
+        return new Response(
+            $this->get('knp_snappy.pdf')->getOutput($pageUrl),
+            200,
+            array(
+                'Content-Type'          => 'application/pdf',
+                'Content-Disposition'   => 'attachment; filename="file.pdf"'
+            )
+        );
     }
 
     /**
