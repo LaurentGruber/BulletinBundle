@@ -123,7 +123,7 @@ class BulletinController extends Controller
     public function listClasseAction(Periode $periode)
     {
         $this->checkOpen();
-        $classes = $this->classRepo->findAll();
+        $classes = $this->classeRepo->findAll();
         return array('periode' => $periode, 'classes' => $classes);
     }
 
@@ -181,6 +181,30 @@ class BulletinController extends Controller
         return array('form' => $form->createView(), 'eleve' => $eleve);
 
 
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/{periode}/{eleve}/print/",
+     *     name="laurentBulletinPrintEleve",
+     *     options = {"expose"=true}
+     * )
+     *
+     *
+     * @param Periode $periode
+     * @param User $eleve
+     *
+     *@EXT\Template("LaurentBulletinBundle::BulletinPrint.html.twig")
+     *
+     * @return array|Response
+     */
+    public function printEleveAction(Request $request, Periode $periode, User $eleve){
+        $this->checkOpen();
+
+        $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
+        $pemds = $this->pemdRepo->findPeriodeElevePointDivers($eleve, $periode);
+
+        return array('pemps' => $pemps, 'pemds' => $pemds, 'eleve' => $eleve, 'periode' => $periode);
     }
 
 
