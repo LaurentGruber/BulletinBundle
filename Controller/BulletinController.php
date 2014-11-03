@@ -19,7 +19,7 @@ use Claroline\CoreBundle\Entity\Group;
 use Laurent\BulletinBundle\Entity\Periode;
 use Laurent\BulletinBundle\Entity\Pemps;
 use Laurent\BulletinBundle\Form\Type\PempsType;
-use Laurent\SchoolBundle\Entity\Classe;
+use Laurent\SchoolBundle\Entity\Matiere;
 
 
 class BulletinController extends Controller
@@ -40,6 +40,10 @@ class BulletinController extends Controller
     private $userRepo;
     /** @var ClassRepository */
     private $classRepo;
+    /** @var ProfMatiereGroupRepository */
+    private $pmgrRepo;
+
+
 
     /**
      * @DI\InjectParams({
@@ -72,6 +76,7 @@ class BulletinController extends Controller
         $this->groupRepo          = $om->getRepository('ClarolineCoreBundle:Group');
         $this->userRepo           = $om->getRepository('ClarolineCoreBundle:User');
         $this->classeRepo         = $om->getRepository('LaurentSchoolBundle:Classe');
+        $this->pmgrRepo           = $om->getRepository('LaurentSchoolBundle:ProfMatiereGroup');
 
 
     }
@@ -116,15 +121,38 @@ class BulletinController extends Controller
      *
      * @param Periode $periode
      *
-     *@EXT\Template("LaurentBulletinBundle::BulletinListClasses.html.twig")
+     * @EXT\ParamConverter("user", options={"authenticatedUser" = true})
+     * @param User         $user         the user
+     *
      *
      * @return array|Response
      */
-    public function listClasseAction(Periode $periode)
+    public function listClasseAction(Periode $periode, User $user)
     {
         $this->checkOpen();
-        $classes = $this->classeRepo->findAll();
-        return array('periode' => $periode, 'classes' => $classes);
+        $groups = array();
+        if ($this->sc->isGranted('ROLE_BULLETIN_ADMIN')){
+            $classes = $this->classeRepo->findAll();
+            foreach ($classes as $classe){
+                $groups[] = $classe->getGroup();
+            }
+            $content = $this->renderView('LaurentBulletinBundle::BulletinListClasses.html.twig',
+                array('periode' => $periode, 'groups' => $groups)
+                );
+            return new Response($content);
+        }
+
+        elseif ($this->sc->isGranted('ROLE_PROF')){
+            $pmgrs = $this->pmgrRepo->findByProf($user);
+            $content = $this->renderView('LaurentBulletinBundle::BulletinListGroups.html.twig',
+                array('periode' => $periode, 'pmgrs' => $pmgrs)
+                );
+            return new Response($content);
+        }
+
+        else { return $this->redirect('http://google.be');}
+
+
     }
 
     /**
@@ -185,6 +213,59 @@ class BulletinController extends Controller
 
     /**
      * @EXT\Route(
+     *     "/{periode}/{group}/{matiere}/edit/",
+     *     name="laurentBulletinEditMatiere",
+     *     options = {"expose"=true}
+     * )
+     *
+     *
+     * @param Periode $periode
+     * @param Group $group
+     * @param Matiere $matiere
+     *
+     *@EXT\Template("LaurentBulletinBundle::BulletinEditMatiere.html.twig")
+     *
+     * @return array|Response
+     */
+    public function editMatiereAction(Request $request, Periode $periode, Group $group, Matiere $matiere)
+    {
+        $this->checkOpen();
+        $pemps = array();
+        $eleves = $this->userRepo->findByGroup($group);
+        $pempCollection = new Pemps;
+        foreach ( $eleves as $eleve){
+            $pempCollection->getPemps()->add($this->pempRepo->findPeriodeMatiereEleve($periode, $eleve, $matiere));
+        }
+
+        $form = $this->createForm(new PempsType, $pempCollection);
+
+        if ($request->isMethod('POST')) {
+            $form->handleRequest($request);
+            //if ($form->isValid()) {
+            //  throw new \Exception('toto');
+            foreach ($pempCollection as $pemp){
+                $this->em->persist($pemp);
+            }
+            $this->em->flush();
+
+            $nextAction = $form->get('saveAndAdd')->isClicked()
+                ? 'task_new'
+                : $this->generateUrl('laurentBulletinEditMatiere', array('periode' => $periode->getId(), 'matiere' => $matiere->getId(), 'eleve' => $eleve->getId()));
+
+            return $this->redirect($nextAction);
+            //}
+            // else {
+            //     throw new \Exception('tata');
+            // }
+        }
+
+        return array('form' => $form->createView(), 'matiere' => $matiere, 'group' => $group);
+
+
+    }
+
+    /**
+     * @EXT\Route(
      *     "/{periode}/{eleve}/print/",
      *     name="laurentBulletinPrintEleve",
      *     options = {"expose"=true}
@@ -199,7 +280,7 @@ class BulletinController extends Controller
      * @return array|Response
      */
     public function printEleveAction(Request $request, Periode $periode, User $eleve){
-        $this->checkOpen();
+        #$this->checkOpen();
 
         $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
         $pemds = $this->pemdRepo->findPeriodeElevePointDivers($eleve, $periode);
@@ -210,7 +291,7 @@ class BulletinController extends Controller
 
     private function checkOpen()
     {
-        if ($this->sc->isGranted('ROLE_BULLETIN_ADMIN')) {
+        if ($this->sc->isGranted('ROLE_BULLETIN_ADMIN') or $this->sc->isGranted('ROLE_PROF')) {
             return true;
         }
 

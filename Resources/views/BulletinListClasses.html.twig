@@ -2,12 +2,12 @@
 
 {% block section_content %}
     <div class="panel-heading">
-        <h1>Mes Classes</h1>
+        <h1>Toutes les classes</h1>
     </div>
     <div class="panel-body">
         <table class="table">
-        {% for classe in classes %}
-            <tr><td><a href="{{ path ('laurentBulletinListEleve', {'periode' : periode.id(), 'group' : classe.getGroup().id()}) }}">{{ classe.Name }}</a> </td></tr>
+        {% for group in groups %}
+            <tr><td><a href="{{ path ('laurentBulletinListEleve', {'periode' : periode.id(), 'group' : group.id()}) }}">{{ group.Name }}</a> </td></tr>
         {% endfor %}
         </table>
     </div>

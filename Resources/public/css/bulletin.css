@@ -5,7 +5,7 @@
 }
 @media print {
     .page {
-        margin: 7%;
+        margin: 0;
         border: initial;
         border-radius: initial;
         width: initial;
@@ -13,6 +13,9 @@
         box-shadow: initial;
         background: initial;
         page-break-after: always;
+    }
+    #container{
+        margin:5%
     }
 }
 @page {
@@ -59,7 +62,7 @@
 }
 
 .signature{
-    height: 100px;
+    height: 125px;
     font-size:12px;
     text-align: center;
 }
