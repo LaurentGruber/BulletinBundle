@@ -16,7 +16,6 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Laurent\BulletinBundle\Entity\PeriodeEleveMatierePoint;
 use Laurent\BulletinBundle\Entity\PeriodeElevePointDiversPoint;
 use Laurent\BulletinBundle\Entity\Periode;
-use Claroline\CoreBundle\Entity\User;
 use Claroline\CoreBundle\Entity\Group;
 
 class BulletinAdminController extends Controller
@@ -429,6 +428,43 @@ class BulletinAdminController extends Controller
             'action' => $this->generateUrl('laurentAdminSchoolImportElevePeriodeDivers'),
             'messages' => ''
         );
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/{periode}/{group}/export/list/",
+     *     name="laurentBulletinListEleve",
+     *     options = {"expose"=true}
+     * )
+     *
+     *
+     * @param Periode $periode
+     * @param Group $group
+     *
+     */
+    public function adminSchoolExportGroupListAction(Request $request, Group $group)
+    {
+        $this->checkOpen();
+
+        $answers = $this->userRepo->findByGroup($group);
+
+        $handle = fopen('php://memory', 'r+');
+        $header = array();
+
+        foreach ($answers as $answer) {
+            fputcsv($handle, $answer->getData());
+        }
+
+        rewind($handle);
+        $content = stream_get_contents($handle);
+        fclose($handle);
+        $groupName = $group->getName();
+        $contD= "attachment; filename=$groupName.csv";
+
+        return new Response($content, 200, array(
+            'Content-Type' => 'application/force-download',
+            'Content-Disposition' => $contD
+        ));
     }
 
     private function checkOpen()
