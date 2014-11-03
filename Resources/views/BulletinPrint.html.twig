@@ -46,6 +46,11 @@
                     <td>{{ pemp.matiere.getOfficialName() }}</td>
                     <td colspan="5" class="center">Certificat médical</td>
                 </tr>
+            {% elseif pemp.point == 888 %}
+                <tr>
+                    <td>{{ pemp.matiere.getOfficialName() }}</td>
+                    <td colspan="5" class="center">Certificat médical</td>
+                </tr>
             {% else %}
                 <tr>
                     <td>{{ pemp.matiere.getOfficialName() }}</td>
