@@ -136,7 +136,7 @@ class BulletinController extends Controller
             foreach ($classes as $classe){
                 $groups[] = $classe->getGroup();
             }
-            $content = $this->renderView('LaurentBulletinBundle::BulletinListClasses.html.twig',
+            $content = $this->renderView('LaurentBulletinBundle::Admin/BulletinListClasses.html.twig',
                 array('periode' => $periode, 'groups' => $groups)
                 );
             return new Response($content);
@@ -166,7 +166,7 @@ class BulletinController extends Controller
      * @param Periode $periode
      * @param User $eleve
      *
-     *@EXT\Template("LaurentBulletinBundle::BulletinEdit.html.twig")
+     *@EXT\Template("LaurentBulletinBundle::Admin/BulletinEdit.html.twig")
      *
      * @return array|Response
      */
@@ -275,7 +275,7 @@ class BulletinController extends Controller
      * @param Periode $periode
      * @param User $eleve
      *
-     *@EXT\Template("LaurentBulletinBundle::BulletinPrint.html.twig")
+     *@EXT\Template("LaurentBulletinBundle::Admin/BulletinPrint.html.twig")
      *
      * @return array|Response
      */

@@ -1,2 +1,6 @@
 plugin:
   has_options: false
+
+  admin_tools:
+    - name: laurent_bulletin_admin_tool
+      class: folder-open
