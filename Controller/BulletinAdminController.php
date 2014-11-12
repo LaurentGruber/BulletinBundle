@@ -544,18 +544,17 @@ class BulletinAdminController extends Controller
                 $this->em->flush();
             }
         }
-        return array('form' => $form->createView());
+        return array('form' => $form->createView(), 'action' => $this->generateUrl('laurentBulletinPeriodeAdd'));
     }
 
     /**
      * @EXT\Route(
-     *     "admin/{periode}/edit/",
+     *     "/admin/periode/{periode}/edit",
      *     name="laurentBulletinPeriodeEdit",
      *     options = {"expose"=true}
      * )
      *
      * @param Periode $periode
-
      * @EXT\Template("LaurentBulletinBundle::Admin/PeriodeForm.html.twig")
      */
 
@@ -573,7 +572,7 @@ class BulletinAdminController extends Controller
                 $this->em->flush();
             }
         }
-        return array('form' => $form->createView());
+        return array('form' => $form->createView(), 'action' => $this->generateUrl('laurentBulletinPeriodeEdit', array('periode' => $periode->getId())));
     }
 
     private function checkOpen()

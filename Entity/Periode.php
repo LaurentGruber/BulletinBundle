@@ -23,12 +23,12 @@ class Periode
     private $name;
 
     /**
-     * @ORM\Column(name="start_date", type="integer", nullable=true)
+     * @ORM\Column(name="start_date", type="datetime", nullable=true)
      */
     private $start;
 
     /**
-     * @ORM\Column(name="end_date", type="integer", nullable=true)
+     * @ORM\Column(name="end_date", type="datetime", nullable=true)
      */
     private $end;
 

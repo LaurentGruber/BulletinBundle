@@ -92,7 +92,7 @@ class BulletinController extends Controller
 
     /**
      * @EXT\Route(
-     *     "/{periode}/{group}/list/",
+     *     "/periode/{periode}/{group}/list/",
      *     name="laurentBulletinListEleve",
      *     options = {"expose"=true}
      * )
@@ -114,7 +114,7 @@ class BulletinController extends Controller
 
     /**
      * @EXT\Route(
-     *     "/{periode}/list/",
+     *     "/periode/{periode}/list/",
      *     name="laurentBulletinListClasse",
      *     options = {"expose"=true}
      * )
@@ -157,7 +157,7 @@ class BulletinController extends Controller
 
     /**
      * @EXT\Route(
-     *     "/{periode}/{eleve}/edit/",
+     *     "/periode/{periode}/{eleve}/edit/",
      *     name="laurentBulletinEditEleve",
      *     options = {"expose"=true}
      * )
@@ -213,7 +213,7 @@ class BulletinController extends Controller
 
     /**
      * @EXT\Route(
-     *     "/{periode}/{group}/{matiere}/edit/",
+     *     "/periode/{periode}/{group}/{matiere}/edit/",
      *     name="laurentBulletinEditMatiere",
      *     options = {"expose"=true}
      * )
@@ -266,7 +266,7 @@ class BulletinController extends Controller
 
     /**
      * @EXT\Route(
-     *     "/{periode}/{eleve}/print/",
+     *     "/periode/{periode}/{eleve}/print/",
      *     name="laurentBulletinPrintEleve",
      *     options = {"expose"=true}
      * )
