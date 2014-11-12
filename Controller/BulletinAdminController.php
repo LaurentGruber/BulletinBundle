@@ -19,6 +19,7 @@ use Laurent\BulletinBundle\Entity\PeriodeEleveMatierePoint;
 use Laurent\BulletinBundle\Entity\PeriodeElevePointDiversPoint;
 use Laurent\BulletinBundle\Form\Admin\PeriodeType;
 use Claroline\CoreBundle\Entity\Group;
+use Claroline\CoreBundle\Entity\User;
 
 class BulletinAdminController extends Controller
 {
@@ -32,6 +33,8 @@ class BulletinAdminController extends Controller
     private $userRepo;
     /** @var MatiereRepository */
     private $matiereRepo;
+    /** @var ClasseRepository */
+    private $classeRepo;
     /** @var DiversRepository */
     private $diversRepo;
     /** @var PeriodeRepository */
@@ -78,6 +81,7 @@ class BulletinAdminController extends Controller
         $this->groupRepo          = $om->getRepository('ClarolineCoreBundle:Group');
         $this->userRepo          = $om->getRepository('ClarolineCoreBundle:User');
         $this->matiereRepo        = $om->getRepository('LaurentSchoolBundle:Matiere');
+        $this->classeRepo        = $om->getRepository('LaurentSchoolBundle:Classe');
         $this->diversRepo        = $om->getRepository('LaurentBulletinBundle:PointDivers');
         $this->periodeRepo        = $om->getRepository('LaurentBulletinBundle:Periode');
         $this->pempRepo           = $om->getRepository('LaurentBulletinBundle:PeriodeEleveMatierePoint');
@@ -133,8 +137,8 @@ class BulletinAdminController extends Controller
 
     /**
      * @EXT\Route(
-     *     "/admin/{periode}/{group}/pdf/",
-     *     name="laurentBulletinPrintPdf",
+     *     "/admin/periode/{periode}/group/{group}/pdf/",
+     *     name="laurentBulletinPrintGroupPdf",
      *     options = {"expose"=true}
      * )
      *
@@ -147,23 +151,53 @@ class BulletinAdminController extends Controller
      * @return array|Response
      */
 
-    public function PrintPdfAction(Periode $periode, Group $group)
+    public function PrintPdfGroupAction(Periode $periode, Group $group)
     {
-        #throw new \Exception($this->pdfDir);
         $this->checkOpen();
+
+        $dir = $this->pdfDir . $group->getName() . '/' . $group->getName(). '-'. date("Y-m-d-H-i-s") . '.pdf';
+
         $eleves = $this->userRepo->findByGroup($group);
-        $eleve = 25;
+        $elevesUrl = array();
+        foreach ($eleves as $eleve){
+            $elevesUrl[] = $this->generateUrl('laurentBulletinPrintEleve', array('periode' => $periode->getId(), 'eleve' => $eleve->getId()), true);
+        }
 
-        $pageUrl = $this->generateUrl('laurentBulletinPrintEleve', array('periode' => $periode->getId(), 'eleve' => $eleve), true); // use absolute path!
+        $this->get('knp_snappy.pdf')->generate($elevesUrl, $dir);
 
-        return new Response(
-            $this->get('knp_snappy.pdf')->getOutput($pageUrl),
-            200,
-            array(
-                'Content-Type'          => 'application/pdf',
-                'Content-Disposition'   => 'attachment; filename="file.pdf"'
-            )
-        );
+        return $dir;
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/periode/{periode}/eleve/{user}/pdf/",
+     *     name="laurentBulletinPrintElevePdf",
+     *     options = {"expose"=true}
+     * )
+     *
+     *
+     * @param Periode $periode
+     * @param User $user
+     *
+     *@EXT\Template("LaurentBulletinBundle::Admin/BulletinPrintPdf.html.twig")
+     *
+     * @return array|Response
+     */
+
+    public function PrintPdfEleveAction(Periode $periode, User $user)
+    {
+        $this->checkOpen();
+
+        $classe = $this->classeRepo->findUserClasse($user);
+
+        $dir = $this->pdfDir . $classe->getName() . '/' . $user->getLastName() . $user->getFirstName(). '-'. date("Y-m-d-H-i-s") . '.pdf';
+
+        $eleveUrl = $this->generateUrl('laurentBulletinPrintEleve', array('periode' => $periode->getId(), 'eleve' => $user->getId()), true);
+
+
+        $this->get('knp_snappy.pdf')->generate($eleveUrl, $dir);
+
+        return $dir;
     }
 
     /**

@@ -280,7 +280,7 @@ class BulletinController extends Controller
      * @return array|Response
      */
     public function printEleveAction(Request $request, Periode $periode, User $eleve){
-        #$this->checkOpen();
+        $this->checkOpenPrintPdf($request);
 
         $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
         $pemds = $this->pemdRepo->findPeriodeElevePointDivers($eleve, $periode);
@@ -292,6 +292,18 @@ class BulletinController extends Controller
     private function checkOpen()
     {
         if ($this->sc->isGranted('ROLE_BULLETIN_ADMIN') or $this->sc->isGranted('ROLE_PROF')) {
+            return true;
+        }
+
+        throw new AccessDeniedException();
+    }
+
+    private function checkOpenPrintPdf(Request $request = NULL)
+    {
+        if ($this->sc->isGranted('ROLE_BULLETIN_ADMIN') or $this->sc->isGranted('ROLE_PROF')) {
+            return true;
+        }
+        elseif (!is_null($request) && $request->getClientIp() === '127.0.0.1'){
             return true;
         }
 
