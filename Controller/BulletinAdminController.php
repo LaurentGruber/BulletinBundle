@@ -148,14 +148,13 @@ class BulletinAdminController extends Controller
      *
      *@EXT\Template("LaurentBulletinBundle::Admin/BulletinPrintPdf.html.twig")
      *
-     * @return array|Response
      */
 
     public function PrintPdfGroupAction(Periode $periode, Group $group)
     {
         $this->checkOpen();
-
-        $dir = $this->pdfDir . $group->getName() . '/' . $group->getName(). '-'. date("Y-m-d-H-i-s") . '.pdf';
+        $filename = $group->getName(). '-'. date("Y-m-d-H-i-s") . '.pdf';
+        $dir = $this->pdfDir . $group->getName() . '/' . $filename;
 
         $eleves = $this->userRepo->findByGroup($group);
         $elevesUrl = array();
@@ -165,7 +164,12 @@ class BulletinAdminController extends Controller
 
         $this->get('knp_snappy.pdf')->generate($elevesUrl, $dir);
 
-        return $dir;
+        $headers = array(
+            'Content-Type'          => 'application/pdf',
+            'Content-Disposition'   => 'attachment; filename="'.$filename.'"'
+        );
+
+        return new Response(file_get_contents($dir), 200, $headers);
     }
 
     /**
@@ -181,7 +185,6 @@ class BulletinAdminController extends Controller
      *
      *@EXT\Template("LaurentBulletinBundle::Admin/BulletinPrintPdf.html.twig")
      *
-     * @return array|Response
      */
 
     public function PrintPdfEleveAction(Periode $periode, User $user)
@@ -189,15 +192,21 @@ class BulletinAdminController extends Controller
         $this->checkOpen();
 
         $classe = $this->classeRepo->findUserClasse($user);
-
-        $dir = $this->pdfDir . $classe->getName() . '/' . $user->getLastName() . $user->getFirstName(). '-'. date("Y-m-d-H-i-s") . '.pdf';
+        $filename = $user->getLastName() . $user->getFirstName(). '-'. date("Y-m-d-H-i-s") . '.pdf';
+        $dir = $this->pdfDir . $classe->getName() . '/' . $filename;
 
         $eleveUrl = $this->generateUrl('laurentBulletinPrintEleve', array('periode' => $periode->getId(), 'eleve' => $user->getId()), true);
 
 
         $this->get('knp_snappy.pdf')->generate($eleveUrl, $dir);
 
-        return $dir;
+        $headers = array(
+            'Content-Type'          => 'application/pdf',
+            'Content-Disposition'   => 'attachment; filename="'.$filename.'"'
+        );
+
+        return new Response(file_get_contents($dir), 200, $headers);
+
     }
 
     /**

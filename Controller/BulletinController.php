@@ -44,7 +44,6 @@ class BulletinController extends Controller
     private $pmgrRepo;
 
 
-
     /**
      * @DI\InjectParams({
      *      "sc"                 = @DI\Inject("security.context"),
@@ -300,10 +299,15 @@ class BulletinController extends Controller
 
     private function checkOpenPrintPdf(Request $request = NULL)
     {
+        $ServerIp =  system("curl -s ipv4.icanhazip.com");
         if ($this->sc->isGranted('ROLE_BULLETIN_ADMIN') or $this->sc->isGranted('ROLE_PROF')) {
             return true;
         }
         elseif (!is_null($request) && $request->getClientIp() === '127.0.0.1'){
+            return true;
+        }
+
+        elseif (!is_null($request) && $request->getClientIp() == $ServerIp){
             return true;
         }
 
