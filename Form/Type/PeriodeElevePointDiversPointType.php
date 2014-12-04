@@ -9,7 +9,7 @@ use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 class PeriodeElevePointDiversPointType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options){
-        $builder->add('divers');
+        $builder->add('divers', 'entity', array('required' => false, 'disabled' => true, 'read_only' => true, 'class' => 'Laurent\BulletinBundle\Entity\PointDivers'));
         $builder->add('point', 'text', array('required'  => false));
         $builder->add('total', 'text', array('required'  => false, 'read_only' => True));
     }

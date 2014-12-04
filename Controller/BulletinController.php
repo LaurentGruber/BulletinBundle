@@ -175,6 +175,7 @@ class BulletinController extends Controller
 
         $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
         $pemds = $this->pemdRepo->findPeriodeElevePointDivers($eleve, $periode);
+
         $pempCollection = new Pemps;
         foreach ($pemps as $pemp) {
             $pempCollection->getPemps()->add($pemp);
@@ -265,7 +266,7 @@ class BulletinController extends Controller
 
     /**
      * @EXT\Route(
-     *     "/periode/{periode}/{eleve}/print/",
+     *     "/periode/{periode}/eleve/{eleve}/print/",
      *     name="laurentBulletinPrintEleve",
      *     options = {"expose"=true}
      * )
@@ -307,7 +308,7 @@ class BulletinController extends Controller
             return true;
         }
 
-        elseif (!is_null($request) && $request->getClientIp() == $ServerIp){
+        elseif (!is_null($request) && $request->getClientIp() == '91.121.211.13'){
             return true;
         }
 
