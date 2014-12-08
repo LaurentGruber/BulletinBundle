@@ -46,13 +46,13 @@ class Listener
     }
 
     /**
-     * @DI\Observe("open_tool_laurent_bulletin_tool")
+     * @DI\Observe("open_tool_desktop_laurent_bulletin_tool")
      *
      * @param DisplayToolEvent $event
      */
     public function onDisplayDesktop(DisplayToolEvent $event)
     {
-        $subRequest = $this->container->get('request')->duplicate(array(), null, array("_controller" => 'LaurentBulletinBundle:BulletinIndex'));
+        $subRequest = $this->container->get('request')->duplicate(array(), null, array("_controller" => 'LaurentBulletinBundle:Bulletin:index'));
         $response = $this->container->get('http_kernel')->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
 
         $event->setContent($response->getContent());

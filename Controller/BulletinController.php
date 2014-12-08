@@ -20,6 +20,7 @@ use Claroline\CoreBundle\Entity\Group;
 use Laurent\BulletinBundle\Entity\Periode;
 use Laurent\BulletinBundle\Entity\Pemps;
 use Laurent\BulletinBundle\Form\Type\PempsType;
+use Laurent\BulletinBundle\Form\Type\MatiereType;
 use Laurent\SchoolBundle\Entity\Matiere;
 
 
@@ -353,11 +354,7 @@ class BulletinController extends Controller
             }
             $this->em->flush();
 
-            $nextAction = $form->get('saveAndAdd')->isClicked()
-                ? 'task_new'
-                : $this->generateUrl('laurentBulletinEditMatiere', array('periode' => $periode->getId(), 'matiere' => $matiere->getId(), 'eleve' => $eleve->getId()));
-
-            return $this->redirect($nextAction);
+            return $this->redirect($this->generateUrl('laurentBulletinEditMatiere', array('periode' => $periode->getId(), 'matiere' => $matiere->getId(), 'group' => $group->getId())));
             //}
             // else {
             //     throw new \Exception('tata');
@@ -404,7 +401,8 @@ class BulletinController extends Controller
 
     private function checkOpenPrintPdf(Request $request = NULL)
     {
-        $ServerIp =  system("curl -s ipv4.icanhazip.com");
+        //$ServerIp =  system("curl -s ipv4.icanhazip.com");
+
         if ($this->sc->isGranted('ROLE_BULLETIN_ADMIN') or $this->sc->isGranted('ROLE_PROF')) {
             return true;
         }

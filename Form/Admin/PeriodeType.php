@@ -34,7 +34,8 @@ class PeriodeType extends AbstractType
                     'autoclose' => true
                 )
             )
-            ->add('ReunionParent', 'tinymce', array('required' => false, 'label' => 'Réunion des parents'));
+            ->add('ReunionParent', 'tinymce', array('required' => false, 'label' => 'Réunion des parents'))
+            ->add('template', 'text', array('label' => 'Template'));
     }
 
     public function setDefaultOptions(OptionsResolverInterface $resolver)
