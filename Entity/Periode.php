@@ -48,6 +48,11 @@ class Periode
     private $ReunionParent;
 
     /**
+     * @ORM\Column()
+     */
+    private $template;
+
+    /**
      * @return mixed
      */
     public function getId()
@@ -149,6 +154,22 @@ class Periode
     public function getReunionParent()
     {
         return $this->ReunionParent;
+    }
+
+    /**
+     * @param mixed $template
+     */
+    public function setTemplate($template)
+    {
+        $this->template = $template;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTemplate()
+    {
+        return $this->template;
     }
 
 

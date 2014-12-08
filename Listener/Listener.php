@@ -3,6 +3,7 @@
 namespace Laurent\BulletinBundle\Listener;
 
 use Claroline\CoreBundle\Event\OpenAdministrationToolEvent;
+use Claroline\CoreBundle\Event\DisplayToolEvent;
 use JMS\DiExtraBundle\Annotation as DI;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -42,6 +43,20 @@ class Listener
         $params = array();
         $params['_controller'] = 'LaurentBulletinBundle:BulletinAdmin:index';
         $this->redirect($params, $event);
+    }
+
+    /**
+     * @DI\Observe("open_tool_laurent_bulletin_tool")
+     *
+     * @param DisplayToolEvent $event
+     */
+    public function onDisplayDesktop(DisplayToolEvent $event)
+    {
+        $subRequest = $this->container->get('request')->duplicate(array(), null, array("_controller" => 'LaurentBulletinBundle:BulletinIndex'));
+        $response = $this->container->get('http_kernel')->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
+
+        $event->setContent($response->getContent());
+
     }
 
 

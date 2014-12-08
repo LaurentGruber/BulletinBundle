@@ -149,7 +149,6 @@ class BulletinAdminController extends Controller
      *@EXT\Template("LaurentBulletinBundle::Admin/BulletinPrintPdf.html.twig")
      *
      */
-
     public function PrintPdfGroupAction(Periode $periode, Group $group)
     {
         $this->checkOpen();
@@ -186,7 +185,6 @@ class BulletinAdminController extends Controller
      *@EXT\Template("LaurentBulletinBundle::Admin/BulletinPrintPdf.html.twig")
      *
      */
-
     public function PrintPdfEleveAction(Periode $periode, User $user)
     {
         $this->checkOpen();
@@ -600,7 +598,6 @@ class BulletinAdminController extends Controller
      * @param Periode $periode
      * @EXT\Template("LaurentBulletinBundle::Admin/PeriodeForm.html.twig")
      */
-
     public function adminSchoolPeriodeEditAction(Request $request, Periode $periode)
     {
         $this->checkOpen();

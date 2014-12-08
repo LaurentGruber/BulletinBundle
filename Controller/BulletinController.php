@@ -2,6 +2,7 @@
 
 namespace Laurent\BulletinBundle\Controller;
 
+use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -42,6 +43,8 @@ class BulletinController extends Controller
     private $classRepo;
     /** @var ProfMatiereGroupRepository */
     private $pmgrRepo;
+    /** @var PeriodeRepository */
+    private $periodeRepo;
 
 
     /**
@@ -76,6 +79,7 @@ class BulletinController extends Controller
         $this->userRepo           = $om->getRepository('ClarolineCoreBundle:User');
         $this->classeRepo         = $om->getRepository('LaurentSchoolBundle:Classe');
         $this->pmgrRepo           = $om->getRepository('LaurentSchoolBundle:ProfMatiereGroup');
+        $this->periodeRepo        = $om->getRepository('LaurentBulletinBundle:Periode');
 
 
     }
@@ -86,7 +90,44 @@ class BulletinController extends Controller
     public function indexAction()
     {
         $this->checkOpen();
-        return $this->render('LaurentBulletinBundle::BulletinIndex.html.twig');
+
+        $periodes = $this->periodeRepo->findAll();
+
+        $periodeCompleted = array();
+
+        foreach ($periodes as $periode){
+            $id = $periode->getId();
+            $total = 0;
+            $nbComp = 0;
+
+            $pemps = $this->pempRepo->findByPeriode($periode);
+            foreach ($pemps as $pemp){
+                $total = $total + 3;
+                if ($pemp->getPoint() >= 0){
+                    $nbComp = $nbComp + 1;
+                }
+                elseif ($pemp->getPresence() >= 0){
+                    $nbComp = $nbComp + 1;
+                }
+                elseif ($pemp->getComportement() >= 0){
+                    $nbComp = $nbComp + 1;
+                }
+            }
+            $pemds = $this->pemdRepo->findByPeriode($periode);
+            foreach ($pemds as $pemd){
+                $total = $total + 1;
+                if ($pemd->getPoint() >= 0){
+                    $nbComp = $nbComp + 1;
+                }
+
+            }
+            if ($total != 0) {$pourcent = $nbComp / $total * 100;}
+            else {$pourcent = 0;}
+
+            $periodeCompleted[$id] = number_format($pourcent,0);
+        }
+
+        return $this->render('LaurentBulletinBundle::BulletinIndex.html.twig', array('periodes' => $periodes, 'periodeCompleted' => $periodeCompleted));
     }
 
     /**
@@ -156,6 +197,70 @@ class BulletinController extends Controller
 
     /**
      * @EXT\Route(
+     *     "/prof/periode/{periode}/list/",
+     *     name="laurentBulletinListMyGroup",
+     *     options = {"expose"=true}
+     * )
+     *
+     * @param Periode $periode
+     *
+     * @EXT\ParamConverter("user", options={"authenticatedUser" = true})
+     * @param User         $user         the user
+     *
+     *
+     * @return array|Response
+     */
+    public function listMyGroupAction(Periode $periode, User $user)
+    {
+        $this->checkOpen();
+        $groups = array();
+
+        if ($this->sc->isGranted('ROLE_PROF')){
+            $pmgrs = $this->pmgrRepo->findByProf($user);
+            $content = $this->renderView('LaurentBulletinBundle::BulletinListGroups.html.twig',
+                array('periode' => $periode, 'pmgrs' => $pmgrs)
+            );
+            return new Response($content);
+        }
+
+        throw new AccessDeniedException();
+
+
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/prof/periode/{periode}/group/{group}/matiere/{matiere}/list/",
+     *     name="laurentBulletinListEleveProf",
+     *     options = {"expose"=true}
+     * )
+     *
+     *
+     * @param Periode $periode
+     * @param Group $group
+     * @param Matiere $matiere
+     *
+     *@EXT\Template("LaurentBulletinBundle::BulletinListEleves.html.twig")
+     *
+     * @return array|Response
+     */
+    public function listEleveProfAction(Periode $periode, Group $group, Matiere $matiere)
+    {
+        $this->checkOpen();
+
+        if ($matiere->getName() == 'Titulaire'){
+            $titulaireUrl = $this->generateUrl('laurentBulletinListEleve', array('periode' => $periode->getId(), 'group' => $group->getId()));
+            return $this->redirect($titulaireUrl);
+        }
+        else {
+            $editMatiereUrl = $this->generateUrl('laurentBulletinEditMatiere', array('periode' => $periode->getId(), 'matiere' => $matiere->getId(), 'group' => $group->getId()));
+            return $this->redirect($editMatiereUrl);
+        }
+
+    }
+
+    /**
+     * @EXT\Route(
      *     "/periode/{periode}/{eleve}/edit/",
      *     name="laurentBulletinEditEleve",
      *     options = {"expose"=true}
@@ -213,7 +318,7 @@ class BulletinController extends Controller
 
     /**
      * @EXT\Route(
-     *     "/periode/{periode}/{group}/{matiere}/edit/",
+     *     "/periode/{periode}/group/{group}/matiere/{matiere}/edit/",
      *     name="laurentBulletinEditMatiere",
      *     options = {"expose"=true}
      * )
@@ -237,7 +342,7 @@ class BulletinController extends Controller
             $pempCollection->getPemps()->add($this->pempRepo->findPeriodeMatiereEleve($periode, $eleve, $matiere));
         }
 
-        $form = $this->createForm(new PempsType, $pempCollection);
+        $form = $this->createForm(new MatiereType, $pempCollection);
 
         if ($request->isMethod('POST')) {
             $form->handleRequest($request);
@@ -275,8 +380,6 @@ class BulletinController extends Controller
      * @param Periode $periode
      * @param User $eleve
      *
-     *@EXT\Template("LaurentBulletinBundle::Admin/BulletinPrint.html.twig")
-     *
      * @return array|Response
      */
     public function printEleveAction(Request $request, Periode $periode, User $eleve){
@@ -284,8 +387,9 @@ class BulletinController extends Controller
 
         $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
         $pemds = $this->pemdRepo->findPeriodeElevePointDivers($eleve, $periode);
+        $template = 'LaurentBulletinBundle::Templates/'.$periode->getTemplate().'.html.twig';
 
-        return array('pemps' => $pemps, 'pemds' => $pemds, 'eleve' => $eleve, 'periode' => $periode);
+        return $this->render($template, array('pemps' => $pemps, 'pemds' => $pemds, 'eleve' => $eleve, 'periode' => $periode));
     }
 
 
