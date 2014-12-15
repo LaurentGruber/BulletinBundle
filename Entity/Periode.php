@@ -53,6 +53,11 @@ class Periode
     private $template;
 
     /**
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $onlyPoint;
+
+    /**
      * @return mixed
      */
     public function getId()
@@ -170,6 +175,22 @@ class Periode
     public function getTemplate()
     {
         return $this->template;
+    }
+
+    /**
+     * @param mixed $onlyPoint
+     */
+    public function setOnlyPoint($onlyPoint)
+    {
+        $this->onlyPoint = $onlyPoint;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getOnlyPoint()
+    {
+        return $this->onlyPoint;
     }
 
 

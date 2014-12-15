@@ -2,7 +2,7 @@
 
 {% block section_content %}
     <div class="panel-heading">
-     <h1>{{ matiere.officialName }} pour {{ group.name }} </h1>
+     <h1>{{ periode.name }} - {{ matiere.officialName }} pour {{ group.name }} </h1>
     </div>
     <div class="panel-body">
         <div class="panel panel-info">
@@ -19,8 +19,10 @@
                     <th>Élève</th>
                     <th>Point</th>
                     <th>Total</th>
-                    <th>Présence</th>
-                    <th>Comportement</th>
+                    {% if periode.onlyPoint != 1 %}
+                        <th>Présence</th>
+                        <th>Comportement</th>
+                    {% endif %}
                 </tr></thead>
                 <tbody>
                 {% for pemp in form.pemps %}
@@ -28,8 +30,10 @@
                         <td>{{ form_widget(pemp.eleve) }}</td>
                         <td class="point">{{ form_widget(pemp.point) }}</td>
                         <td class="total">{{ form_widget(pemp.total) }}</td>
-                        <td class="presence">{{ form_widget(pemp.presence) }}</td>
-                        <td class="comportement">{{ form_widget(pemp.comportement) }}</td>
+                        {% if periode.onlyPoint != 1 %}
+                            <td class="presence">{{ form_widget(pemp.presence) }}</td>
+                            <td class="comportement">{{ form_widget(pemp.comportement) }}</td>
+                        {% endif %}
                     </tr>
                 {% endfor %}
                 </tbody>

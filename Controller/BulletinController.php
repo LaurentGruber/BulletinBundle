@@ -312,7 +312,7 @@ class BulletinController extends Controller
            // }
         }
 
-        return array('form' => $form->createView(), 'eleve' => $eleve);
+        return array('form' => $form->createView(), 'eleve' => $eleve, 'periode' => $periode);
 
 
     }
@@ -361,7 +361,7 @@ class BulletinController extends Controller
             // }
         }
 
-        return array('form' => $form->createView(), 'matiere' => $matiere, 'group' => $group);
+        return array('form' => $form->createView(), 'matiere' => $matiere, 'group' => $group, 'periode' => $periode);
 
 
     }

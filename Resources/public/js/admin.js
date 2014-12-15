@@ -29,8 +29,8 @@ $('.addPeriodeBtn').on('click', function () {
 });
 
 // Click on widget create button
-$('.editPeriodeBtn').on('click', function () {
-    var periodeId = $('.editPeriodeBtn').data('periode-id');
+$('.editPeriodeBtn').on('click', function (event) {
+    var periodeId = $(event.currentTarget).data('periode-id');
     $.ajax({
         url: Routing.generate(
             'laurentBulletinPeriodeEdit', {'periode': periodeId}

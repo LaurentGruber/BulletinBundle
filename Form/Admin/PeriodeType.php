@@ -35,7 +35,8 @@ class PeriodeType extends AbstractType
                 )
             )
             ->add('ReunionParent', 'tinymce', array('required' => false, 'label' => 'Réunion des parents'))
-            ->add('template', 'text', array('label' => 'Template'));
+            ->add('template', 'text', array('label' => 'Template'))
+            ->add('onlyPoint', 'checkbox', array('label' => 'Uniquement des points'));
     }
 
     public function setDefaultOptions(OptionsResolverInterface $resolver)
