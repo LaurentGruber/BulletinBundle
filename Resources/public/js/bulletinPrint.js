@@ -9,6 +9,9 @@ $( document ).ready(function() {
         totTot = totTot + total;
         var pourc = point / total * 100
         $(this).text(Number((pourc).toFixed(1)) + " %");
+        if (Number((pourc).toFixed(1)) < 50){
+            $(this).parent().addClass('echec');
+        }
     });
     $('#totPoint').text(totPoint);
     $('#totTot').text(totTot);

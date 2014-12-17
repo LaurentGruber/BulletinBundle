@@ -15,12 +15,12 @@
         page-break-after: always;
     }
     #content{
-        margin:5%
+        margin:4%
     }
 }
 @page {
     size: A4;
-    margin : 7%
+    margin : 5%
 }
 
 #title-box{
@@ -45,6 +45,15 @@
     padding-left:0px;
 }
 
+.exam{
+    padding-right: 0px;
+
+}
+
+#pointDivers{
+    padding-left: 0px;
+}
+
 #remarque{
     height: 185px;
 }
@@ -58,15 +67,20 @@
 }
 
 #reunion{
+    margin-top:10px;
     padding:10px;
 }
 
 .signature{
-    height: 125px;
+    height: 115px;
     font-size:12px;
     text-align: center;
 }
 
 .signature .panel{
     height: 100%;
+}
+
+.echec{
+    background-color: rgb(213, 213, 213);
 }

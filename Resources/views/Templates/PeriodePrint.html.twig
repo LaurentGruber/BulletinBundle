@@ -52,13 +52,21 @@
                     <td colspan="5" class="center">Certificat médical</td>
                 </tr>
             {% else %}
-                <tr>
+                <tr class="">
                     <td>{{ pemp.matiere.getOfficialName() }}</td>
                     <td class="center point">{{ pemp.point }}</td>
                     <td class="center total">{{ pemp.total }}</td>
                     <td class="center pourcent" data="{{ pemp.total }}"></td>
-                    <td class="center">{{ pemp.comportement }} / 10</td>
-                    <td class="center">{{ pemp.presence }} %</td>
+                    {% if pemp.comportement < 850 %}
+                        <td class="center">{{ pemp.comportement }} / 10</td>
+                    {% else %}
+                        <td class="center">NE</td>
+                    {% endif %}
+                    {% if pemp.comportement < 850 %}
+                        <td class="center">{{ pemp.presence }} %</td>
+                    {% else %}
+                        <td class="center">NE</td>
+                    {% endif %}
                 </tr>
             {% endif %}
             {% endfor %}

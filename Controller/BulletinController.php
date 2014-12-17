@@ -442,7 +442,7 @@ class BulletinController extends Controller
         $json = $this->totauxManager->getDataChart($eleve);
         //throw new \Exception(var_dump($json));
 
-        return $this->render('LaurentBulletinBundle::BulletinShowDataChart.html.twig', array('json' => $json));
+        return $this->render('LaurentBulletinBundle::BulletinShowDataChart.html.twig', array('json' => $json, 'eleve' => $eleve));
 
     }
 

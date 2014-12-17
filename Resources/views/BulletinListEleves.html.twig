@@ -11,6 +11,7 @@
                 <td><a href="{{ path ('laurentBulletinEditEleve', {'periode' : periode.id(), 'eleve' : eleve.id()}) }}">{{ eleve.getFirstName() }} {{ eleve.getLastName() }}</a> </td>
                 <td><a href="{{ path ('laurentBulletinPrintEleve', {'periode' : periode.id(), 'eleve' : eleve.id()}) }}">Voir Bulletin officiel</a></td>
                 <td><a href="{{ path('laurentBulletinPrintElevePdf', {'periode' : periode.id(), 'user' : eleve.id()}) }}">Imprimer le bulletin</a> </td>
+                <td><a href="{{ path ('laurentBulletinShowEleveDataChart', {'eleve' : eleve.id()}) }}">Évolution</a> </td>
             </tr>
         {% endfor %}
         </table>

@@ -96,31 +96,27 @@ class TotauxManager
     public function getDataChart(User $eleve)
     {
         $periodes = array(1, 2, 3);
-        $diffRGB = 15;
 
         $data = new \StdClass();
-        $data->labels = array('Période 1', 'Période 2', 'Période 3');
+        $data->labels = array('Période 1', 'Période 2', 'Examen');
         $data->datasets = array();
 
         //créons les matières avec les moyens du bord !
         $periode = $this->periodeRepo->findOneById(1);
         $matieres = array();
         $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
-        $i = 0;
 
         foreach ($pemps as $pemp) {
-            $rgb = $i * $diffRGB;
             $object = new \StdClass();
             $object->label = $pemp->getMatiere()->getName();
-            $object->fillColor = "rgba{$rgb},{$rgb},{$rgb},1)";
-            $object->pointColor = "rgba({$rgb},{$rgb},{$rgb},1)";
-            $object->pointStrokeColor = "rgba({$rgb},{$rgb},{$rgb},1)";
-            $object->pointHighlightFill = "rgba({$rgb},{$rgb},{$rgb},1)";
-            $object->pointHighlightStroke = "rgba({$rgb},{$rgb},{$rgb},1)";
+            $object->fillColor = $pemp->getMatiere()->getColor();
+            $object->pointColor = $pemp->getMatiere()->getColor();
+            $object->pointStrokeColor = $pemp->getMatiere()->getColor();
+            $object->pointHighlightFill = $pemp->getMatiere()->getColor();
+            $object->pointHighlightStroke = $pemp->getMatiere()->getColor();
             $object->data = $this->getPourcentageMatierePeriode($pemp->getMatiere(), $eleve);
 
             $data->datasets[] = $object;
-            $i++;
         }
 
         return json_encode($data);
@@ -133,7 +129,12 @@ class TotauxManager
 
         foreach ($periodes as $per){
             $periode = $this->periodeRepo->findOneById($per);
-            $pourcPeriode[] = round($this->pempRepo->findPeriodeMatiereEleve($periode, $eleve, $matiere)->getPourcentage(), 1);
+            if ($this->pempRepo->findPeriodeMatiereEleve($periode, $eleve, $matiere)->getPourcentage() == 999){
+                $pourcPeriode[] = '';
+            } else{
+                $pourcPeriode[] = round($this->pempRepo->findPeriodeMatiereEleve($periode, $eleve, $matiere)->getPourcentage(), 1);
+            }
+
         }
         return $pourcPeriode;
     }
