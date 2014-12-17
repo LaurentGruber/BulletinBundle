@@ -274,7 +274,7 @@ class BulletinAdminController extends Controller
                 $content = $this->renderView('LaurentSchoolBundle::Admin/adminSchoolImportView.html.twig',
                     array('form' => $form->createView(),
                         'titre' => '',
-                        'action' => $this->generateUrl('laurentAdminSchoolImportGroupPeriodeMatiere'),
+                        'action' => $this->generateUrl('laurentBulletinImportGroupPeriodeMatiere'),
                         'messages' => $messages
                     ));
 

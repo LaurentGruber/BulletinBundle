@@ -208,4 +208,29 @@ class PeriodeEleveMatierePoint
         return $this->position;
     }
 
+    public function getPourcentage()
+    {
+        if ($this->point < 850){
+            $pourcentage = ($this->point / $this->total) * 100;
+        }
+        else {
+            $pourcentage = 999;
+        }
+
+        return $pourcentage;
+    }
+
+    public function getDisplayPourcentage(){
+        if ($this->point == 999){
+            $pourcentage = 'NE';
+        }
+        elseif ($this->point == 888){
+            $pourcentage = 'CM';
+        }
+        else {
+            $pourcentage = round(($this->point / $this->total) * 100, 1).' %';
+        }
+        return $pourcentage;
+    }
+
 }

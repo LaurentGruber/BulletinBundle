@@ -2,6 +2,7 @@
 
 namespace Laurent\BulletinBundle\Controller;
 
+use Laurent\BulletinBundle\Manager\TotauxManager;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -46,6 +47,7 @@ class BulletinController extends Controller
     private $pmgrRepo;
     /** @var PeriodeRepository */
     private $periodeRepo;
+    private $totauxManager;
 
 
     /**
@@ -55,7 +57,8 @@ class BulletinController extends Controller
      *      "roleManager"        = @DI\Inject("claroline.manager.role_manager"),
      *      "userManager"        = @DI\Inject("claroline.manager.user_manager"),
      *      "em"                 = @DI\Inject("doctrine.orm.entity_manager"),
-     *      "om"                 = @DI\Inject("claroline.persistence.object_manager")
+     *      "om"                 = @DI\Inject("claroline.persistence.object_manager"),
+     *      "totauxManager"      = @DI\Inject("laurent.manager.totaux_manager"),
      * })
      */
 
@@ -64,6 +67,7 @@ class BulletinController extends Controller
         ToolManager $toolManager,
         RoleManager $roleManager,
         UserManager $userManager,
+        TotauxManager $totauxManager,
         EntityManager $em,
         ObjectManager $om
       )
@@ -81,6 +85,7 @@ class BulletinController extends Controller
         $this->classeRepo         = $om->getRepository('LaurentSchoolBundle:Classe');
         $this->pmgrRepo           = $om->getRepository('LaurentSchoolBundle:ProfMatiereGroup');
         $this->periodeRepo        = $om->getRepository('LaurentBulletinBundle:Periode');
+        $this->totauxManager      = $totauxManager;
 
 
     }
@@ -381,14 +386,65 @@ class BulletinController extends Controller
      */
     public function printEleveAction(Request $request, Periode $periode, User $eleve){
         $this->checkOpenPrintPdf($request);
+        $totaux = [];
+        $totauxMatieres = [];
+        $recap = 0;
 
-        $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
-        $pemds = $this->pemdRepo->findPeriodeElevePointDivers($eleve, $periode);
+        if (!$periode->getOnlyPoint()){
+            $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
+            $pemds = $this->pemdRepo->findPeriodeElevePointDivers($eleve, $periode);
+
+        } else {
+            $pemps = array();
+            $pemds = array();
+
+            $periodes = array(1, 2, 3);
+
+            foreach ($periodes as $per){
+                $periode = $this->periodeRepo->findOneById($per);
+                $pemps[] = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
+                $pemds[] = $this->pemdRepo->findPeriodeElevePointDivers($eleve, $periode);
+
+                $totaux[] = $this->totauxManager->getTotalPeriode($periode, $eleve);
+
+            }
+            $totauxMatieres = $this->totauxManager->getTotalPeriodes($eleve);
+        }
+
         $template = 'LaurentBulletinBundle::Templates/'.$periode->getTemplate().'.html.twig';
 
-        return $this->render($template, array('pemps' => $pemps, 'pemds' => $pemds, 'eleve' => $eleve, 'periode' => $periode));
+
+        foreach ($totaux as $total) {
+            $recap += $total['totalPourcentage'] / 3;
+        }
+
+        $recap = round($recap, 1);
+
+        $params = array('pemps' => $pemps, 'pemds' => $pemds, 'eleve' => $eleve, 'periode' => $periode, 'totaux' => $totaux, 'totauxMatieres' => $totauxMatieres, 'recap' => $recap);
+
+        return $this->render($template, $params);
     }
 
+    /**
+     * @EXT\Route(
+     *     "/chart/eleve/{eleve}",
+     *     name="laurentBulletinShowEleveDataChart",
+     *     options = {"expose"=true}
+     * )
+     *
+     * @param User $eleve
+     *
+     * @return Response
+     */
+    public function showDataChartAction(User $eleve)
+    {
+        $this->checkOpen();
+        $json = $this->totauxManager->getDataChart($eleve);
+        //throw new \Exception(var_dump($json));
+
+        return $this->render('LaurentBulletinBundle::BulletinShowDataChart.html.twig', array('json' => $json));
+
+    }
 
     private function checkOpen()
     {
