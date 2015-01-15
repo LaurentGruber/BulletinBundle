@@ -439,11 +439,34 @@ class BulletinController extends Controller
     public function showDataChartAction(User $eleve)
     {
         $this->checkOpen();
-        $json = $this->totauxManager->getDataChart($eleve);
+        $json = $this->totauxManager->getDataChart($eleve, true);
+        $jsonNoCeb = $this->totauxManager->getDataChart($eleve, false);
         //throw new \Exception(var_dump($json));
 
-        return $this->render('LaurentBulletinBundle::BulletinShowDataChart.html.twig', array('json' => $json, 'eleve' => $eleve));
+        return $this->render('LaurentBulletinBundle::BulletinShowDataChart.html.twig', array('json' => $json, 'jsonNoCeb' => $jsonNoCeb, 'eleve' => $eleve));
 
+    }
+
+    /**
+     * @EXT\Route("/user/{user}/bulletinWidget/", name="laurentBulletinWidget")
+     *
+     * @param User $user
+     *
+     */
+    public function bulletinWidgetAction(User $user)
+    {
+        $totauxMatieres = $this->totauxManager->getTotalPeriodesMatiere($user);
+
+        $matCeb = array("Français", "Math", "Néerlandais", "Histoire", "Géographie", "Sciences");
+        $cebWithPoints = [];
+        $nocebWithPoints = [];
+
+        foreach ($totauxMatieres as $matiere => $val) {
+            in_array($matiere, $matCeb) ? $cebWithPoints[$matiere] = $val:  $nocebWithPoints[$matiere] = $val;
+        }
+        $params = array('user' => $user, 'totauxMatieresCeb' => $cebWithPoints, 'totauxMatieresNoCeb' => $nocebWithPoints);
+
+        return $this->render('LaurentBulletinBundle::BulletinWidget.html.twig', $params);
     }
 
     private function checkOpen()

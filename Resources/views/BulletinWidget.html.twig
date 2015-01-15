@@ -1,0 +1,27 @@
+<div class="panel-heading" xmlns="http://www.w3.org/1999/html">
+    <h1>Bulletin</h1>
+</div>
+<div class="panel-body">
+    <div class="row">{{ render(controller('LaurentBulletinBundle:Bulletin:showDataChart', { 'eleve': user.getId() } )) }}</div>
+    <div class="row">
+
+        <div class="col-xs-6">
+            <table class="table table-bordered table-striped">
+                {% for name, totalMatiere in totauxMatieresCeb %}
+                    <tr><td>{{ name }}</td><td>{{ totalMatiere }} %</td>        </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div class="col-xs-6">
+            <table class="table table-bordered table-striped">
+
+                {% for name, totalMatiere in totauxMatieresNoCeb %}
+                    <tr><td>{{ name }}</td><td>{{ totalMatiere }} %</td>        </tr>
+                {% endfor %}
+
+            </table>
+        </div>
+    </div>
+
+</div>

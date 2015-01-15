@@ -93,9 +93,45 @@ class TotauxManager
         return $totaux;
     }
 
-    public function getDataChart(User $eleve)
+    public function getTotalPeriodesMatiere(User $eleve){
+        $periodes = array(1, 2, 3);
+        $totaux = array();
+        $nbPeriodes = array();
+
+
+        $periode = $this->periodeRepo->findOneById(3);
+        $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
+
+        foreach ($pemps as $key => $pemp){
+            $totaux[$pemp->getMatiere()->getName()] = 0;
+            $nbPeriodes[$pemp->getMatiere()->getName()] = 0;
+
+        }
+
+
+        foreach ($periodes as $per){
+            $periode = $this->periodeRepo->findOneById($per);
+            $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
+
+            foreach ($pemps as $key => $pemp){
+                if ($pemp->getPourcentage() != 999){
+                    $totaux[$pemp->getMatiere()->getName()] += $pemp->getPourcentage();
+                    $nbPeriodes[$pemp->getMatiere()->getName()]++;
+                }
+            }
+        }
+
+        foreach ($totaux as $key => $total) {
+            $totaux[$key] = round($total / $nbPeriodes[$key], 1);
+        }
+
+        return $totaux;
+    }
+
+    public function getDataChart(User $eleve, $isCeb = true)
     {
         $periodes = array(1, 2, 3);
+        $matCeb = array("Français", "Math", "Néerlandais", "Histoire", "Géographie", "Sciences");
 
         $data = new \StdClass();
         $data->labels = array('Période 1', 'Période 2', 'Examen');
@@ -107,6 +143,7 @@ class TotauxManager
         $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
 
         foreach ($pemps as $pemp) {
+            $pempInCeb = in_array($pemp->getMatiere()->getName(), $matCeb) ? true: false;
             $object = new \StdClass();
             $object->label = $pemp->getMatiere()->getName();
             $object->fillColor = $pemp->getMatiere()->getColor();
@@ -116,7 +153,8 @@ class TotauxManager
             $object->pointHighlightStroke = $pemp->getMatiere()->getColor();
             $object->data = $this->getPourcentageMatierePeriode($pemp->getMatiere(), $eleve);
 
-            $data->datasets[] = $object;
+            if ($pempInCeb && $isCeb) $data->datasets[] = $object;
+            if (!$pempInCeb && !$isCeb) $data->datasets[] = $object;
         }
 
         return json_encode($data);
