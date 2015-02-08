@@ -271,7 +271,7 @@ class BulletinAdminController extends Controller
                 $this->om->endFlushSuite();
 
                 fclose($file);
-                $content = $this->renderView('LaurentSchoolBundle::Admin/adminSchoolImportView.html.twig',
+                $content = $this->renderView('LaurentBulletinBundle::Admin/adminBulletinImportView.html.twig',
                     array('form' => $form->createView(),
                         'titre' => '',
                         'action' => $this->generateUrl('laurentBulletinImportGroupPeriodeMatiere'),
@@ -353,10 +353,10 @@ class BulletinAdminController extends Controller
                 $this->om->endFlushSuite();
 
                 fclose($file);
-                $content = $this->renderView('LaurentSchoolBundle::Admin/adminSchoolImportView.html.twig',
+                $content = $this->renderView('LaurentBulletinBundle::Admin/adminBulletinImportView.html.twig',
                     array('form' => $form->createView(),
                         'titre' => '',
-                        'action' => $this->generateUrl('laurentAdminSchoolImportGroupPeriodeDivers'),
+                        'action' => $this->generateUrl('laurentBulletinImportGroupPeriodeDivers'),
                         'messages' => $messages
                     ));
 
@@ -433,7 +433,7 @@ class BulletinAdminController extends Controller
                 $this->om->endFlushSuite();
 
                 fclose($file);
-                $content = $this->renderView('LaurentSchoolBundle::adminSchoolImportView.html.twig',
+                $content = $this->renderView('LaurentBulletinBundle::Admin/adminBulletinImportView.html.twig',
                     array('form' => $form->createView(),
                         'titre' => '',
                         'action' => $this->generateUrl('laurentAdminSchoolImportElevePeriodeMatiere'),
@@ -512,7 +512,7 @@ class BulletinAdminController extends Controller
                 $this->om->endFlushSuite();
 
                 fclose($file);
-                $content = $this->renderView('LaurentSchoolBundle::Admin/adminSchoolImportView.html.twig',
+                $content = $this->renderView('LaurentBulletinBundle::Admin/adminBulletinImportView.html.twig',
                     array('form' => $form->createView(),
                         'titre' => '',
                         'action' => $this->generateUrl('laurentAdminSchoolImportElevePeriodeDivers'),
