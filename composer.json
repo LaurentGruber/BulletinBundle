@@ -15,7 +15,7 @@
     "require": {
         "php": ">=5.4.1",
         "claroline/core-bundle": "~5.0",
-        "laurent/school-bundle": "dev-5.0-dev",
+        "laurent/school-bundle": "~5.0",
         "knplabs/knp-snappy-bundle": "1.2"
     },
     "autoload": {
