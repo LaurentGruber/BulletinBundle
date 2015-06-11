@@ -14,7 +14,7 @@ use Claroline\CoreBundle\Manager\RoleManager;
 use Claroline\CoreBundle\Manager\UserManager;
 use Doctrine\ORM\EntityManager;
 use Claroline\CoreBundle\Persistence\ObjectManager;
-use Symfony\Component\Security\Core\SecurityContextInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Claroline\CoreBundle\Entity\User;
 use Claroline\CoreBundle\Entity\Group;
@@ -27,7 +27,7 @@ use Laurent\SchoolBundle\Entity\Matiere;
 
 class BulletinController extends Controller
 {
-    private $sc;
+    private $authorization;
     private $toolManager;
     private $roleManager;
     private $userManager;
@@ -52,7 +52,7 @@ class BulletinController extends Controller
 
     /**
      * @DI\InjectParams({
-     *      "sc"                 = @DI\Inject("security.context"),
+     *      "authorization"      = @DI\Inject("security.authorization_checker"),
      *      "toolManager"        = @DI\Inject("claroline.manager.tool_manager"),
      *      "roleManager"        = @DI\Inject("claroline.manager.role_manager"),
      *      "userManager"        = @DI\Inject("claroline.manager.user_manager"),
@@ -63,7 +63,7 @@ class BulletinController extends Controller
      */
 
     public function __construct(
-        SecurityContextInterface $sc,
+        AuthorizationCheckerInterface $authorization,
         ToolManager $toolManager,
         RoleManager $roleManager,
         UserManager $userManager,
@@ -72,7 +72,7 @@ class BulletinController extends Controller
         ObjectManager $om
       )
     {
-        $this->sc                 = $sc;
+        $this->authorization      = $authorization;
         $this->toolManager        = $toolManager;
         $this->roleManager        = $roleManager;
         $this->userManager        = $userManager;
@@ -177,7 +177,7 @@ class BulletinController extends Controller
     {
         $this->checkOpen();
         $groups = array();
-        if ($this->sc->isGranted('ROLE_BULLETIN_ADMIN')){
+        if ($this->authorization->isGranted('ROLE_BULLETIN_ADMIN')){
             $classes = $this->classeRepo->findAll();
             foreach ($classes as $classe){
                 $groups[] = $classe->getGroup();
@@ -188,7 +188,7 @@ class BulletinController extends Controller
             return new Response($content);
         }
 
-        elseif ($this->sc->isGranted('ROLE_PROF')){
+        elseif ($this->authorization->isGranted('ROLE_PROF')){
             $pmgrs = $this->pmgrRepo->findByProf($user);
             $content = $this->renderView('LaurentBulletinBundle::BulletinListGroups.html.twig',
                 array('periode' => $periode, 'pmgrs' => $pmgrs)
@@ -221,7 +221,7 @@ class BulletinController extends Controller
         $this->checkOpen();
         $groups = array();
 
-        if ($this->sc->isGranted('ROLE_PROF')){
+        if ($this->authorization->isGranted('ROLE_PROF')){
             $pmgrs = $this->pmgrRepo->findByProf($user);
             $content = $this->renderView('LaurentBulletinBundle::BulletinListGroups.html.twig',
                 array('periode' => $periode, 'pmgrs' => $pmgrs)
@@ -471,7 +471,7 @@ class BulletinController extends Controller
 
     private function checkOpen()
     {
-        if ($this->sc->isGranted('ROLE_BULLETIN_ADMIN') or $this->sc->isGranted('ROLE_PROF')) {
+        if ($this->authorization->isGranted('ROLE_BULLETIN_ADMIN') or $this->authorization->isGranted('ROLE_PROF')) {
             return true;
         }
 
@@ -482,7 +482,7 @@ class BulletinController extends Controller
     {
         //$ServerIp =  system("curl -s ipv4.icanhazip.com");
 
-        if ($this->sc->isGranted('ROLE_BULLETIN_ADMIN') or $this->sc->isGranted('ROLE_PROF')) {
+        if ($this->authorization->isGranted('ROLE_BULLETIN_ADMIN') or $this->authorization->isGranted('ROLE_PROF')) {
             return true;
         }
         elseif (!is_null($request) && $request->getClientIp() === '127.0.0.1'){

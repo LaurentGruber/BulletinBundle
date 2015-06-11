@@ -12,7 +12,7 @@ use Claroline\CoreBundle\Manager\RoleManager;
 use Claroline\CoreBundle\Manager\UserManager;
 use Claroline\CoreBundle\Persistence\ObjectManager;
 use Doctrine\ORM\EntityManager;
-use Symfony\Component\Security\Core\SecurityContextInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Laurent\BulletinBundle\Entity\Periode;
 use Laurent\BulletinBundle\Entity\PeriodeEleveMatierePoint;
@@ -23,7 +23,7 @@ use Claroline\CoreBundle\Entity\User;
 
 class BulletinAdminController extends Controller
 {
-    private $sc;
+    private $authorization;
     private $toolManager;
     private $roleManager;
     private $userManager;
@@ -50,7 +50,7 @@ class BulletinAdminController extends Controller
 
     /**
      * @DI\InjectParams({
-     *      "sc"                 = @DI\Inject("security.context"),
+     *      "authorization"      = @DI\Inject("security.authorization_checker"),
      *      "toolManager"        = @DI\Inject("claroline.manager.tool_manager"),
      *      "roleManager"        = @DI\Inject("claroline.manager.role_manager"),
      *      "userManager"        = @DI\Inject("claroline.manager.user_manager"),
@@ -61,7 +61,7 @@ class BulletinAdminController extends Controller
      */
 
     public function __construct(
-        SecurityContextInterface $sc,
+        AuthorizationCheckerInterface $authorization,
         ToolManager $toolManager,
         RoleManager $roleManager,
         UserManager $userManager,
@@ -70,7 +70,7 @@ class BulletinAdminController extends Controller
         $pdfDir
     )
     {
-        $this->sc                 = $sc;
+        $this->authorization      = $authorization;
         $this->toolManager        = $toolManager;
         $this->roleManager        = $roleManager;
         $this->userManager        = $userManager;
@@ -617,7 +617,7 @@ class BulletinAdminController extends Controller
 
     private function checkOpen()
     {
-        if ($this->sc->isGranted('ROLE_BULLETIN_ADMIN')) {
+        if ($this->authorization->isGranted('ROLE_BULLETIN_ADMIN')) {
             return true;
         }
 
