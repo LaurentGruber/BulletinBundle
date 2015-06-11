@@ -456,6 +456,7 @@ class BulletinController extends Controller
     public function bulletinWidgetAction(User $user)
     {
         $totauxMatieres = $this->totauxManager->getTotalPeriodesMatiere($user);
+        $periodes = $this->periodeRepo->findAll();
 
         $matCeb = array("Français", "Math", "Néerlandais", "Histoire", "Géographie", "Sciences");
         $cebWithPoints = [];
@@ -464,7 +465,12 @@ class BulletinController extends Controller
         foreach ($totauxMatieres as $matiere => $val) {
             in_array($matiere, $matCeb) ? $cebWithPoints[$matiere] = $val:  $nocebWithPoints[$matiere] = $val;
         }
-        $params = array('user' => $user, 'totauxMatieresCeb' => $cebWithPoints, 'totauxMatieresNoCeb' => $nocebWithPoints);
+        $params = array(
+            'user' => $user,
+            'totauxMatieresCeb' => $cebWithPoints,
+            'totauxMatieresNoCeb' => $nocebWithPoints,
+            'periodes' => $periodes
+        );
 
         return $this->render('LaurentBulletinBundle::BulletinWidget.html.twig', $params);
     }

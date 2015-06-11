@@ -2,6 +2,18 @@
     <h1>Bulletin</h1>
 </div>
 <div class="panel-body">
+    <div class="row">
+        <div class="btn-group col-xs-12">
+            {% for periode in periodes %}
+                <a href="{{ path('laurentBulletinPrintEleve', {'periode': periode.getId(), 'eleve': user.getId()}) }}"
+                   class="btn btn-default"
+                >
+                    {{ periode.getName() }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+    <br>
     <div class="row">{{ render(controller('LaurentBulletinBundle:Bulletin:showDataChart', { 'eleve': user.getId() } )) }}</div>
     <div class="row">
 
