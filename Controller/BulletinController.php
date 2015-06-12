@@ -509,6 +509,23 @@ class BulletinController extends Controller
         return $this->render('LaurentBulletinBundle::BulletinComportementWidget.html.twig', $params);
     }
 
+    /**
+     * @EXT\Route(
+     *     "/user/{user}/bulletinPointsDiversWidget/",
+     *     name="laurentBulletinPointsDiversWidget"
+     * )
+     *
+     * @param User $user
+     */
+    public function bulletinPointsDiversWidgetAction(User $user)
+    {
+        $pointsDivers = $this->totauxManager->getMoyennePointsDivers($user);
+
+        $params = array('pointsDivers' => $pointsDivers);
+
+        return $this->render('LaurentBulletinBundle::BulletinPointsDiversWidget.html.twig', $params);
+    }
+
     private function checkOpen()
     {
         if ($this->authorization->isGranted('ROLE_BULLETIN_ADMIN') or $this->authorization->isGranted('ROLE_PROF')) {

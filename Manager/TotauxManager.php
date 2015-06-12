@@ -185,7 +185,7 @@ class TotauxManager
         $points = $this->pempRepo->findPEMPByUserAndNonOnlyPointPeriode($user);
 
         foreach ($points as $point) {
-            $presence = is_null($point->getPresence()) ? 0 : intval($point->getPresence());
+            $presence = is_null($point->getPresence()) ? 0 : $point->getPresence();
             $matiere = $point->getMatiere();
             $matiereId = $matiere->getId();
 
@@ -215,7 +215,7 @@ class TotauxManager
         foreach ($points as $point) {
             $comportement = is_null($point->getComportement()) ?
                 0 :
-                intval($point->getComportement());
+                $point->getComportement();
             $matiere = $point->getMatiere();
             $matiereId = $matiere->getId();
 
@@ -230,6 +230,46 @@ class TotauxManager
 
         foreach ($results as $key => $result) {
             $results[$key]['comportement'] /= $nbPeriodes;
+        }
+
+        return $results;
+    }
+
+    public function getMoyennePointsDivers(User $user)
+    {
+        $results = array();
+        $pointsDiversPoints = $this->pemdRepo->findPEPDPByUserAndNonOnlyPointPeriode($user);
+
+        foreach ($pointsDiversPoints as $pointsDiversPoint) {
+            $pointDivers = $pointsDiversPoint->getDivers();
+            $pointDiversId = $pointDivers->getId();
+            $withTotal = $pointDivers->getWithTotal();
+            $points = is_null($pointsDiversPoint->getPoint()) ?
+                0 :
+                $pointsDiversPoint->getPoint();
+            $total = is_null($pointsDiversPoint->getTotal()) ?
+                0 :
+                $pointsDiversPoint->getTotal();
+
+            if (!isset($results[$pointDiversId])) {
+                $results[$pointDiversId] = array();
+                $results[$pointDiversId]['name'] = $pointDivers->getName();
+                $results[$pointDiversId]['withTotal'] = $withTotal;
+                $results[$pointDiversId]['points'] = $points;
+                $results[$pointDiversId]['total'] = $total;
+            } else {
+                $results[$pointDiversId]['points'] += $points;
+                $results[$pointDiversId]['total'] += $total;
+            }
+        }
+
+        foreach ($results as $key => $result) {
+
+            if ($results[$key]['withTotal']) {
+                $results[$key]['value'] = $result['points'] . ' / ' . $result['total'];
+            } else {
+                $results[$key]['value'] = $result['points'];
+            }
         }
 
         return $results;

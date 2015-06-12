@@ -22,4 +22,22 @@ class PeriodeElevePointDiversPointRepository extends EntityRepository
         $query = $qb->getQuery();
         return $results = $query->getResult();
     }
+
+    public function findPEPDPByUserAndNonOnlyPointPeriode(User $user)
+    {
+        $dql = '
+            SELECT pepdp
+            FROM Laurent\BulletinBundle\Entity\PeriodeElevePointDiversPoint pepdp
+            JOIN pepdp.periode p
+            WHERE pepdp.eleve = :eleve
+            AND (
+                p.onlyPoint IS NULL
+                OR p.onlyPoint = false
+            )
+        ';
+        $query = $this->_em->createQuery($dql);
+        $query->setParameter('eleve', $user);
+
+        return $query->getResult();
+    }
 }
