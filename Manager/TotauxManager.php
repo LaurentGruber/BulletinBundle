@@ -176,4 +176,62 @@ class TotauxManager
         }
         return $pourcPeriode;
     }
+
+    public function getMoyennePresence(User $user)
+    {
+        $results = array();
+        $periodes = $this->periodeRepo->findNonOnlyPointPeriodes();
+        $nbPeriodes = count($periodes);
+        $points = $this->pempRepo->findPEMPByUserAndNonOnlyPointPeriode($user);
+
+        foreach ($points as $point) {
+            $presence = is_null($point->getPresence()) ? 0 : intval($point->getPresence());
+            $matiere = $point->getMatiere();
+            $matiereId = $matiere->getId();
+
+            if (!isset($results[$matiereId])) {
+                $results[$matiereId] = array();
+                $results[$matiereId]['matiere'] = $matiere->getName();
+                $results[$matiereId]['presence'] = $presence;
+            } else {
+                $results[$matiereId]['presence'] += $presence;
+            }
+        }
+
+        foreach ($results as $key => $result) {
+            $results[$key]['presence'] /= $nbPeriodes;
+        }
+
+        return $results;
+    }
+
+    public function getMoyenneComportement(User $user)
+    {
+        $results = array();
+        $periodes = $this->periodeRepo->findNonOnlyPointPeriodes();
+        $nbPeriodes = count($periodes);
+        $points = $this->pempRepo->findPEMPByUserAndNonOnlyPointPeriode($user);
+
+        foreach ($points as $point) {
+            $comportement = is_null($point->getComportement()) ?
+                0 :
+                intval($point->getComportement());
+            $matiere = $point->getMatiere();
+            $matiereId = $matiere->getId();
+
+            if (!isset($results[$matiereId])) {
+                $results[$matiereId] = array();
+                $results[$matiereId]['matiere'] = $matiere->getName();
+                $results[$matiereId]['comportement'] = $comportement;
+            } else {
+                $results[$matiereId]['comportement'] += $comportement;
+            }
+        }
+
+        foreach ($results as $key => $result) {
+            $results[$key]['comportement'] /= $nbPeriodes;
+        }
+
+        return $results;
+    }
 }

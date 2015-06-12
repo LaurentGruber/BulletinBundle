@@ -5,7 +5,7 @@ namespace Laurent\BulletinBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Laurent\BulletinBundle\Repository\PeriodeRepository")
  * @ORM\Table(name="laurent_bulletin_periode")
  */
 class Periode

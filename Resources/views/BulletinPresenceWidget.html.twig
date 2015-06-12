@@ -1,0 +1,12 @@
+<span>
+    {% if presences|length > 0 %}
+        <table class="table table-bordered table-striped">
+            {% for presence in presences %}
+                <tr>
+                    <td>{{ presence['matiere'] }}</td>
+                    <td>{{ presence['presence'] }} %</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+</span>
