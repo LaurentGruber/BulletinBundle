@@ -39,4 +39,22 @@ class PeriodeEleveMatierePointRepository extends EntityRepository
         $query = $qb->getQuery();
         return $results = $query->getSingleResult();
     }
+
+    public function findPEMPByUserAndNonOnlyPointPeriode(User $user)
+    {
+        $dql = '
+            SELECT pemp
+            FROM Laurent\BulletinBundle\Entity\PeriodeEleveMatierePoint pemp
+            JOIN pemp.periode p
+            WHERE pemp.eleve = :eleve
+            AND (
+                p.onlyPoint IS NULL
+                OR p.onlyPoint = false
+            )
+        ';
+        $query = $this->_em->createQuery($dql);
+        $query->setParameter('eleve', $user);
+
+        return $query->getResult();
+    }
 }

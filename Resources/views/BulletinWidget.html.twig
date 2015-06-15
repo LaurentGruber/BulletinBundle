@@ -2,13 +2,36 @@
     <h1>Bulletin</h1>
 </div>
 <div class="panel-body">
+    <div class="row">
+        <div class="btn-group col-xs-12">
+            {% for periode in periodes %}
+                <a href="{{ path('laurentBulletinPrintEleve', {'periode': periode.getId(), 'eleve': user.getId()}) }}"
+                   class="btn btn-default"
+                >
+                    {{ periode.getName() }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+    <br>
     <div class="row">{{ render(controller('LaurentBulletinBundle:Bulletin:showDataChart', { 'eleve': user.getId() } )) }}</div>
     <div class="row">
 
         <div class="col-xs-6">
             <table class="table table-bordered table-striped">
-                {% for name, totalMatiere in totauxMatieresCeb %}
-                    <tr><td>{{ name }}</td><td>{{ totalMatiere }} %</td>        </tr>
+                
+                {% for totaux in totauxMatieresCeb %}
+                    <tr>
+                        <td>
+                            {% if totaux['color'] is not empty %}
+                                <i class="fa fa-circle" style="color: {{ totaux['color'] }}">
+                                </i>
+                                &nbsp;
+                            {% endif %}
+                            {{ totaux['name'] }}
+                        </td>
+                        <td>{{ totaux['value'] }} %</td>        
+                    </tr>
                 {% endfor %}
             </table>
         </div>
@@ -16,8 +39,18 @@
         <div class="col-xs-6">
             <table class="table table-bordered table-striped">
 
-                {% for name, totalMatiere in totauxMatieresNoCeb %}
-                    <tr><td>{{ name }}</td><td>{{ totalMatiere }} %</td>        </tr>
+                {% for totaux in totauxMatieresNoCeb %}
+                    <tr>
+                        <td>
+                            {% if totaux['color'] is not empty %}
+                                <i class="fa fa-circle" style="color: {{ totaux['color'] }}">
+                                </i>
+                                &nbsp;
+                            {% endif %}
+                            {{ totaux['name'] }}
+                        </td>
+                        <td>{{ totaux['value'] }} %</td>        
+                    </tr>
                 {% endfor %}
 
             </table>

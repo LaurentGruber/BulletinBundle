@@ -441,10 +441,11 @@ class BulletinController extends Controller
         $this->checkOpen();
         $json = $this->totauxManager->getDataChart($eleve, true);
         $jsonNoCeb = $this->totauxManager->getDataChart($eleve, false);
-        //throw new \Exception(var_dump($json));
 
-        return $this->render('LaurentBulletinBundle::BulletinShowDataChart.html.twig', array('json' => $json, 'jsonNoCeb' => $jsonNoCeb, 'eleve' => $eleve));
-
+        return $this->render(
+            'LaurentBulletinBundle::BulletinShowDataChart.html.twig',
+            array('json' => $json, 'jsonNoCeb' => $jsonNoCeb, 'eleve' => $eleve)
+        );
     }
 
     /**
@@ -455,18 +456,82 @@ class BulletinController extends Controller
      */
     public function bulletinWidgetAction(User $user)
     {
+
         $totauxMatieres = $this->totauxManager->getTotalPeriodesMatiere($user);
+        $periodes = $this->periodeRepo->findAll();
 
         $matCeb = array("Français", "Math", "Néerlandais", "Histoire", "Géographie", "Sciences");
-        $cebWithPoints = [];
-        $nocebWithPoints = [];
+        $cebWithPoints = array();
+        $nocebWithPoints = array();
 
-        foreach ($totauxMatieres as $matiere => $val) {
-            in_array($matiere, $matCeb) ? $cebWithPoints[$matiere] = $val:  $nocebWithPoints[$matiere] = $val;
+        foreach ($totauxMatieres as $matiereId => $datas) {
+            $matiereName = $datas['name'];
+
+            if (in_array($matiereName, $matCeb)) {
+                $cebWithPoints[$matiereId] = $datas;
+            } else {
+                $nocebWithPoints[$matiereId] = $datas;
+            }
         }
-        $params = array('user' => $user, 'totauxMatieresCeb' => $cebWithPoints, 'totauxMatieresNoCeb' => $nocebWithPoints);
+        $params = array(
+            'user' => $user,
+            'totauxMatieresCeb' => $cebWithPoints,
+            'totauxMatieresNoCeb' => $nocebWithPoints,
+            'periodes' => $periodes
+        );
 
         return $this->render('LaurentBulletinBundle::BulletinWidget.html.twig', $params);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/user/{user}/bulletinPresenceWidget/",
+     *     name="laurentBulletinPresenceWidget"
+     * )
+     *
+     * @param User $user
+     */
+    public function bulletinPresenceWidgetAction(User $user)
+    {
+        $presences = $this->totauxManager->getMoyennePresence($user);
+
+        $params = array('presences' => $presences);
+
+        return $this->render('LaurentBulletinBundle::BulletinPresenceWidget.html.twig', $params);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/user/{user}/bulletinComportementWidget/",
+     *     name="laurentBulletinComportementWidget"
+     * )
+     *
+     * @param User $user
+     */
+    public function bulletinComportementWidgetAction(User $user)
+    {
+        $comportements = $this->totauxManager->getMoyenneComportement($user);
+
+        $params = array('comportements' => $comportements);
+
+        return $this->render('LaurentBulletinBundle::BulletinComportementWidget.html.twig', $params);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/user/{user}/bulletinPointsDiversWidget/",
+     *     name="laurentBulletinPointsDiversWidget"
+     * )
+     *
+     * @param User $user
+     */
+    public function bulletinPointsDiversWidgetAction(User $user)
+    {
+        $pointsDivers = $this->totauxManager->getMoyennePointsDivers($user);
+
+        $params = array('pointsDivers' => $pointsDivers);
+
+        return $this->render('LaurentBulletinBundle::BulletinPointsDiversWidget.html.twig', $params);
     }
 
     private function checkOpen()

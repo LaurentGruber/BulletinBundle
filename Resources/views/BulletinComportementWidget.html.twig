@@ -1,0 +1,12 @@
+<span>
+    {% if comportements|length > 0 %}
+        <table class="table table-bordered table-striped">
+            {% for comportement in comportements %}
+                <tr>
+                    <td>{{ comportement['matiere'] }}</td>
+                    <td>{{ comportement['comportement'] }} / 10</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+</span>
