@@ -485,6 +485,44 @@ class BulletinController extends Controller
 
     /**
      * @EXT\Route(
+     *     "/user/{user}/printable/bulletinWidget/",
+     *     name="laurentPrintableBulletinWidget"
+     * )
+     *
+     * @param User $user
+     *
+     */
+    public function printableBulletinWidgetAction(User $user)
+    {
+
+        $totauxMatieres = $this->totauxManager->getTotalPeriodesMatiere($user);
+        $periodes = $this->periodeRepo->findAll();
+
+        $matCeb = array("Français", "Math", "Néerlandais", "Histoire", "Géographie", "Sciences");
+        $cebWithPoints = array();
+        $nocebWithPoints = array();
+
+        foreach ($totauxMatieres as $matiereId => $datas) {
+            $matiereName = $datas['name'];
+
+            if (in_array($matiereName, $matCeb)) {
+                $cebWithPoints[$matiereId] = $datas;
+            } else {
+                $nocebWithPoints[$matiereId] = $datas;
+            }
+        }
+        $params = array(
+            'user' => $user,
+            'totauxMatieresCeb' => $cebWithPoints,
+            'totauxMatieresNoCeb' => $nocebWithPoints,
+            'periodes' => $periodes
+        );
+
+        return $this->render('LaurentBulletinBundle::printableBulletinWidget.html.twig', $params);
+    }
+
+    /**
+     * @EXT\Route(
      *     "/user/{user}/bulletinPresenceWidget/",
      *     name="laurentBulletinPresenceWidget"
      * )
@@ -532,6 +570,23 @@ class BulletinController extends Controller
         $params = array('pointsDivers' => $pointsDivers);
 
         return $this->render('LaurentBulletinBundle::BulletinPointsDiversWidget.html.twig', $params);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/user/{user}/printable/bulletinPointsDiversWidget/",
+     *     name="laurentPrintableBulletinPointsDiversWidget"
+     * )
+     *
+     * @param User $user
+     */
+    public function printableBulletinPointsDiversWidgetAction(User $user)
+    {
+        $pointsDivers = $this->totauxManager->getMoyennePointsDivers($user);
+
+        $params = array('pointsDivers' => $pointsDivers);
+
+        return $this->render('LaurentBulletinBundle::printableBulletinPointsDiversWidget.html.twig', $params);
     }
 
     private function checkOpen()
