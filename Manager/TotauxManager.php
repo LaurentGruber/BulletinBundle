@@ -93,36 +93,37 @@ class TotauxManager
         return $totaux;
     }
 
-    public function getTotalPeriodesMatiere(User $eleve){
-        $periodes = array(1, 2, 3);
+    public function getTotalPeriodesMatiere(User $eleve)
+    {
+        $periodes = $this->periodeRepo->findAll();
         $totaux = array();
-        $nbPeriodes = array();
-
-
-        $periode = $this->periodeRepo->findOneById(3);
-        $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
-
-        foreach ($pemps as $key => $pemp){
-            $totaux[$pemp->getMatiere()->getName()] = 0;
-            $nbPeriodes[$pemp->getMatiere()->getName()] = 0;
-
-        }
-
-
-        foreach ($periodes as $per){
-            $periode = $this->periodeRepo->findOneById($per);
+        
+        foreach ($periodes as $periode) {
             $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
 
-            foreach ($pemps as $key => $pemp){
+            foreach ($pemps as $pemp){
+                $matiere = $pemp->getMatiere();
+                $matiereId = $matiere->getId();
+                
+                if (!isset($totaux[$matiereId])) {
+                    $totaux[$matiereId] = array();
+                    $totaux[$matiereId]['name'] = $matiere->getName();
+                    $totaux[$matiereId]['pourcentage'] = 0;
+                    $totaux[$matiereId]['nbPeriodes'] = 0;
+                    $totaux[$matiereId]['color'] = $matiere->getColor();
+                }
+                
                 if ($pemp->getPourcentage() != 999){
-                    $totaux[$pemp->getMatiere()->getName()] += $pemp->getPourcentage();
-                    $nbPeriodes[$pemp->getMatiere()->getName()]++;
+                    $totaux[$matiereId]['pourcentage'] += $pemp->getPourcentage();
+                    $totaux[$matiereId]['nbPeriodes']++;
                 }
             }
         }
 
         foreach ($totaux as $key => $total) {
-            $totaux[$key] = round($total / $nbPeriodes[$key], 1);
+            $pourcentage = $total['pourcentage'];
+            $nbPeriodes = $total['nbPeriodes'];
+            $totaux[$key]['value'] = round($pourcentage / $nbPeriodes, 1);
         }
 
         return $totaux;
@@ -130,43 +131,55 @@ class TotauxManager
 
     public function getDataChart(User $eleve, $isCeb = true)
     {
-        $periodes = array(1, 2, 3);
+//        $periodes = array(1, 2, 3);
+        $periodes = $this->periodeRepo->findAll();
+        $periodeNames = array();
         $matCeb = array("Français", "Math", "Néerlandais", "Histoire", "Géographie", "Sciences");
 
+        foreach ($periodes as $periode) {
+            $periodeNames[] = $periode->getName();
+        }
         $data = new \StdClass();
-        $data->labels = array('Période 1', 'Période 2', 'Examen');
+        $data->labels = $periodeNames;
         $data->datasets = array();
 
         //créons les matières avec les moyens du bord !
         $periode = $this->periodeRepo->findOneById(1);
-        $matieres = array();
         $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
 
         foreach ($pemps as $pemp) {
-            $pempInCeb = in_array($pemp->getMatiere()->getName(), $matCeb) ? true: false;
+            $matiere = $pemp->getMatiere();
+            $matiereName = $matiere->getName();
+            $matiereColor = $matiere->getColor();
+            $pempInCeb = in_array($matiereName, $matCeb) ? true: false;
             $object = new \StdClass();
-            $object->label = $pemp->getMatiere()->getName();
-            $object->fillColor = $pemp->getMatiere()->getColor();
-            $object->pointColor = $pemp->getMatiere()->getColor();
-            $object->pointStrokeColor = $pemp->getMatiere()->getColor();
-            $object->pointHighlightFill = $pemp->getMatiere()->getColor();
-            $object->pointHighlightStroke = $pemp->getMatiere()->getColor();
-            $object->data = $this->getPourcentageMatierePeriode($pemp->getMatiere(), $eleve);
+            $object->label = $matiereName;
+            $object->fillColor = $matiereColor;
+            $object->pointColor = $matiereColor;
+            $object->strokeColor = $matiereColor;
+            $object->pointStrokeColor = $matiereColor;
+            $object->pointHighlightFill = $matiereColor;
+            $object->pointHighlightStroke = $matiereColor;
+            $object->data = $this->getPourcentageMatierePeriode($matiere, $eleve);
 
-            if ($pempInCeb && $isCeb) $data->datasets[] = $object;
-            if (!$pempInCeb && !$isCeb) $data->datasets[] = $object;
+            if ($pempInCeb && $isCeb) {
+                $data->datasets[] = $object;
+            }
+
+            if (!$pempInCeb && !$isCeb) {
+                $data->datasets[] = $object;
+            }
         }
 
         return json_encode($data);
     }
 
-    private function getPourcentageMatierePeriode(Matiere $matiere, User $eleve) {
-
-        $periodes = array(1, 2, 3);
+    private function getPourcentageMatierePeriode(Matiere $matiere, User $eleve)
+    {
+        $periodes = $this->periodeRepo->findAll();
         $pourcPeriode = array();
 
-        foreach ($periodes as $per){
-            $periode = $this->periodeRepo->findOneById($per);
+        foreach ($periodes as $periode){
             if ($this->pempRepo->findPeriodeMatiereEleve($periode, $eleve, $matiere)->getPourcentage() == 999){
                 $pourcPeriode[] = '';
             } else{
