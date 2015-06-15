@@ -169,6 +169,21 @@ class TotauxManager
                 $data->datasets[] = $object;
             }
         }
+        $redLines = array();
+        
+        foreach ($periodes as $periode) {
+            $redLines[] = 50;
+        }
+        $object = new \StdClass();
+        $object->label = 'Séparateur';
+        $object->fillColor = '#ff0000';
+        $object->pointColor = 'rgba(0,0,0,0)';
+        $object->strokeColor = '#ff0000';
+        $object->pointStrokeColor = 'rgba(0,0,0,0)';
+        $object->pointHighlightFill = 'rgba(0,0,0,0)';
+        $object->pointHighlightStroke = 'rgba(0,0,0,0)';
+        $object->data = $redLines;
+        $data->datasets[] = $object;
 
         return json_encode($data);
     }
