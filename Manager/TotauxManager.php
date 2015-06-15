@@ -131,7 +131,6 @@ class TotauxManager
 
     public function getDataChart(User $eleve, $isCeb = true)
     {
-//        $periodes = array(1, 2, 3);
         $periodes = $this->periodeRepo->findAll();
         $periodeNames = array();
         $matCeb = array("Français", "Math", "Néerlandais", "Histoire", "Géographie", "Sciences");
