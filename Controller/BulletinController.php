@@ -384,8 +384,14 @@ class BulletinController extends Controller
      *
      * @return array|Response
      */
-    public function printEleveAction(Request $request, Periode $periode, User $eleve){
+    public function printEleveAction(Request $request, Periode $periode, User $eleve)
+    {
         $this->checkOpenPrintPdf($request);
+
+        if ($periode->getTemplate() === 'FinalExamPrint') {
+
+            return $this->printFinalExam($periode, $eleve);
+        }
         $totaux = [];
         $totauxMatieres = [];
         $recap = 0;
@@ -586,6 +592,39 @@ class BulletinController extends Controller
         $params = array('pointsDivers' => $pointsDivers);
 
         return $this->render('LaurentBulletinBundle::printableBulletinPointsDiversWidget.html.twig', $params);
+    }
+
+    private function printFinalExam(Periode $periode, User $eleve)
+    {
+        $totaux = array();
+        $recap = 0;
+        $periodes = $this->periodeRepo->findAll();
+//        $pemps = array();
+        $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
+
+        foreach ($periodes as $per){
+            $periodeId = $per->getId();
+            $totaux[$periodeId] = $this->totauxManager->getTotalPeriode($per, $eleve);
+
+        }
+        $totauxMatieres = $this->totauxManager->getFinalTotalPeriodes($eleve);
+
+        foreach ($totaux as $total) {
+            $recap += $total['totalPourcentage'] / count($periodes);
+        }
+
+        $recap = round($recap, 1);
+
+        $params = array(
+            'pemps' => $pemps,
+            'eleve' => $eleve,
+            'periode' => $periode,
+            'totaux' => $totaux,
+            'totauxMatieres' => $totauxMatieres,
+            'recap' => $recap
+        );
+
+        return $this->render('LaurentBulletinBundle::Templates/FinalExamPrint.html.twig', $params);
     }
 
     private function checkOpen()

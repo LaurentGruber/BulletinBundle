@@ -93,6 +93,37 @@ class TotauxManager
         return $totaux;
     }
 
+    public function getFinalTotalPeriodes(User $eleve)
+    {
+        $periodes = $this->periodeRepo->findAll();
+        $totaux = array();
+        $nbPeriodes = array();
+        $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periodes[0]);
+
+        foreach ($pemps as $key => $pemp) {
+            $totaux[$key] = 0;
+            $nbPeriodes[$key] = 0;
+
+        }
+
+        foreach ($periodes as $periode){
+            $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
+
+            foreach ($pemps as $key => $pemp){
+                if ($pemp->getPourcentage() != 999){
+                    $totaux[$key] += $pemp->getPourcentage();
+                    $nbPeriodes[$key]++;
+                }
+            }
+        }
+
+        foreach ($totaux as $key => $total) {
+            $totaux[$key] = round($total / $nbPeriodes[$key], 1);
+        }
+
+        return $totaux;
+    }
+
     public function getTotalPeriodesMatiere(User $eleve)
     {
         $periodes = $this->periodeRepo->findAll();
