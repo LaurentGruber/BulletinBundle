@@ -48,6 +48,7 @@ class BulletinController extends Controller
     /** @var PeriodeRepository */
     private $periodeRepo;
     private $totauxManager;
+    private $periodeEleveDecisionRepo;
 
 
     /**
@@ -86,8 +87,7 @@ class BulletinController extends Controller
         $this->pmgrRepo           = $om->getRepository('LaurentSchoolBundle:ProfMatiereGroup');
         $this->periodeRepo        = $om->getRepository('LaurentBulletinBundle:Periode');
         $this->totauxManager      = $totauxManager;
-
-
+        $this->periodeEleveDecisionRepo = $om->getRepository('LaurentBulletinBundle:PeriodeEleveDecision');
     }
 
     /**
@@ -384,8 +384,14 @@ class BulletinController extends Controller
      *
      * @return array|Response
      */
-    public function printEleveAction(Request $request, Periode $periode, User $eleve){
+    public function printEleveAction(Request $request, Periode $periode, User $eleve)
+    {
         $this->checkOpenPrintPdf($request);
+
+        if ($periode->getTemplate() === 'FinalExamPrint') {
+
+            return $this->printFinalExam($periode, $eleve);
+        }
         $totaux = [];
         $totauxMatieres = [];
         $recap = 0;
@@ -485,6 +491,43 @@ class BulletinController extends Controller
 
     /**
      * @EXT\Route(
+     *     "/user/{user}/printable/bulletinWidget/",
+     *     name="laurentPrintableBulletinWidget"
+     * )
+     *
+     * @param User $user
+     *
+     */
+    public function printableBulletinWidgetAction(User $user)
+    {
+        $totauxMatieres = $this->totauxManager->getTotalPeriodesMatiere($user);
+        $periodes = $this->periodeRepo->findAll();
+
+        $matCeb = array("Français", "Math", "Néerlandais", "Histoire", "Géographie", "Sciences");
+        $cebWithPoints = array();
+        $nocebWithPoints = array();
+
+        foreach ($totauxMatieres as $matiereId => $datas) {
+            $matiereName = $datas['name'];
+
+            if (in_array($matiereName, $matCeb)) {
+                $cebWithPoints[$matiereId] = $datas;
+            } else {
+                $nocebWithPoints[$matiereId] = $datas;
+            }
+        }
+        $params = array(
+            'user' => $user,
+            'totauxMatieresCeb' => $cebWithPoints,
+            'totauxMatieresNoCeb' => $nocebWithPoints,
+            'periodes' => $periodes
+        );
+
+        return $this->render('LaurentBulletinBundle::printableBulletinWidget.html.twig', $params);
+    }
+
+    /**
+     * @EXT\Route(
      *     "/user/{user}/bulletinPresenceWidget/",
      *     name="laurentBulletinPresenceWidget"
      * )
@@ -532,6 +575,59 @@ class BulletinController extends Controller
         $params = array('pointsDivers' => $pointsDivers);
 
         return $this->render('LaurentBulletinBundle::BulletinPointsDiversWidget.html.twig', $params);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/user/{user}/printable/bulletinPointsDiversWidget/",
+     *     name="laurentPrintableBulletinPointsDiversWidget"
+     * )
+     *
+     * @param User $user
+     */
+    public function printableBulletinPointsDiversWidgetAction(User $user)
+    {
+        $pointsDivers = $this->totauxManager->getMoyennePointsDivers($user);
+
+        $params = array('pointsDivers' => $pointsDivers);
+
+        return $this->render('LaurentBulletinBundle::printableBulletinPointsDiversWidget.html.twig', $params);
+    }
+
+    private function printFinalExam(Periode $periode, User $eleve)
+    {
+        $totaux = array();
+        $recap = 0;
+        $periodes = $this->periodeRepo->findAll();
+        $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
+
+        foreach ($periodes as $per){
+            $periodeId = $per->getId();
+            $totaux[$periodeId] = $this->totauxManager->getTotalPeriode($per, $eleve);
+
+        }
+        $totauxMatieres = $this->totauxManager->getFinalTotalPeriodes($eleve);
+
+        foreach ($totaux as $total) {
+            $recap += $total['totalPourcentage'] / count($periodes);
+        }
+
+        $recap = round($recap, 1);
+        $userDecisions = $this->periodeEleveDecisionRepo->findBy(
+            array('user' => $eleve->getId(), 'periode' => $periode->getId())
+        );
+
+        $params = array(
+            'pemps' => $pemps,
+            'eleve' => $eleve,
+            'periode' => $periode,
+            'totaux' => $totaux,
+            'totauxMatieres' => $totauxMatieres,
+            'recap' => $recap,
+            'userDecisions' => $userDecisions
+        );
+
+        return $this->render('LaurentBulletinBundle::Templates/FinalExamPrint.html.twig', $params);
     }
 
     private function checkOpen()

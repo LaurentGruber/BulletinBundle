@@ -28,9 +28,13 @@
                                 </i>
                                 &nbsp;
                             {% endif %}
+                        </td>
+                        <td {% if totaux['value'] < 50 %}style="background-color: #F74747"{% endif %}>
                             {{ totaux['name'] }}
                         </td>
-                        <td>{{ totaux['value'] }} %</td>        
+                        <td {% if totaux['value'] < 50 %}style="background-color: #F74747"{% endif %}>
+                            {{ totaux['value'] }} %
+                        </td>        
                     </tr>
                 {% endfor %}
             </table>
@@ -47,9 +51,13 @@
                                 </i>
                                 &nbsp;
                             {% endif %}
+                        </td>
+                        <td {% if totaux['value'] < 50 %}style="background-color: #F74747"{% endif %}>
                             {{ totaux['name'] }}
                         </td>
-                        <td>{{ totaux['value'] }} %</td>        
+                        <td {% if totaux['value'] < 50 %}style="background-color: #F74747"{% endif %}>
+                            {{ totaux['value'] }} %
+                        </td>        
                     </tr>
                 {% endfor %}
 

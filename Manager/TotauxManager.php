@@ -93,6 +93,37 @@ class TotauxManager
         return $totaux;
     }
 
+    public function getFinalTotalPeriodes(User $eleve)
+    {
+        $periodes = $this->periodeRepo->findAll();
+        $totaux = array();
+        $nbPeriodes = array();
+        $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periodes[0]);
+
+        foreach ($pemps as $key => $pemp) {
+            $totaux[$key] = 0;
+            $nbPeriodes[$key] = 0;
+
+        }
+
+        foreach ($periodes as $periode){
+            $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
+
+            foreach ($pemps as $key => $pemp){
+                if ($pemp->getPourcentage() != 999){
+                    $totaux[$key] += $pemp->getPourcentage();
+                    $nbPeriodes[$key]++;
+                }
+            }
+        }
+
+        foreach ($totaux as $key => $total) {
+            $totaux[$key] = round($total / $nbPeriodes[$key], 1);
+        }
+
+        return $totaux;
+    }
+
     public function getTotalPeriodesMatiere(User $eleve)
     {
         $periodes = $this->periodeRepo->findAll();
@@ -131,7 +162,6 @@ class TotauxManager
 
     public function getDataChart(User $eleve, $isCeb = true)
     {
-//        $periodes = array(1, 2, 3);
         $periodes = $this->periodeRepo->findAll();
         $periodeNames = array();
         $matCeb = array("Français", "Math", "Néerlandais", "Histoire", "Géographie", "Sciences");
@@ -170,6 +200,21 @@ class TotauxManager
                 $data->datasets[] = $object;
             }
         }
+        $redLines = array();
+        
+        foreach ($periodes as $periode) {
+            $redLines[] = 50;
+        }
+        $object = new \StdClass();
+        $object->label = 'Séparateur';
+        $object->fillColor = '#ff0000';
+        $object->pointColor = 'rgba(0,0,0,0)';
+        $object->strokeColor = '#ff0000';
+        $object->pointStrokeColor = 'rgba(0,0,0,0)';
+        $object->pointHighlightFill = 'rgba(0,0,0,0)';
+        $object->pointHighlightStroke = 'rgba(0,0,0,0)';
+        $object->data = $redLines;
+        $data->datasets[] = $object;
 
         return json_encode($data);
     }

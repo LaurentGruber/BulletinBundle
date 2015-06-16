@@ -2,6 +2,11 @@
 
 {% block section_content %}
     <div class="panel-heading">
+        <span class="pull-right">
+            <a href="{{ path('laurentBulletinDecisionsList') }}">
+                <i class="fa fa-cog"></i>
+            </a>
+        </span>
         <h1>Élèves du group {{ group.getName() }}</h1>
     </div>
     <div class="panel-body">
@@ -12,6 +17,15 @@
                 <td><a href="{{ path ('laurentBulletinPrintEleve', {'periode' : periode.id(), 'eleve' : eleve.id()}) }}">Voir Bulletin officiel</a></td>
                 <td><a href="{{ path('laurentBulletinPrintElevePdf', {'periode' : periode.id(), 'user' : eleve.id()}) }}">Imprimer le bulletin</a> </td>
                 <td><a href="{{ path ('laurentBulletinShowEleveDataChart', {'eleve' : eleve.id()}) }}">Évolution</a> </td>
+                
+                {% if periode.getOnlyPoint() %}
+                    <td>
+                        <a href="{{ path ('laurentBulletinUserDecisionsList', {'user' : eleve.getId(), 'periode': periode.getId()}) }}">
+                            <i class="fa fa-cogs"></i>
+                            Décisions
+                        </a>
+                    </td>
+                {% endif %}
             </tr>
         {% endfor %}
         </table>
