@@ -122,6 +122,23 @@
                     Décision du conseil de classe
                 </div>
                 <div class="panel-body">
+                    {% if userDecisions|length > 0 %}
+                        <ul>
+                            {% for userDecision in userDecisions %}
+                                {% set decision = userDecision.getDecision() %}
+                                {% set matieres = userDecision.getMatieres() %}
+                                <li>
+                                    {{ decision.getContent() }}
+
+                                    {% if matieres|length > 0 %}
+                                        {% for matiere in matieres %}
+                                            {{ matiere.getOfficialName() }}{% if not loop.last %},{% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
                 </div>
             </div>
         </div>

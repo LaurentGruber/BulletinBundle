@@ -48,6 +48,7 @@ class BulletinController extends Controller
     /** @var PeriodeRepository */
     private $periodeRepo;
     private $totauxManager;
+    private $periodeEleveDecisionRepo;
 
 
     /**
@@ -86,8 +87,7 @@ class BulletinController extends Controller
         $this->pmgrRepo           = $om->getRepository('LaurentSchoolBundle:ProfMatiereGroup');
         $this->periodeRepo        = $om->getRepository('LaurentBulletinBundle:Periode');
         $this->totauxManager      = $totauxManager;
-
-
+        $this->periodeEleveDecisionRepo = $om->getRepository('LaurentBulletinBundle:PeriodeEleveDecision');
     }
 
     /**
@@ -599,7 +599,6 @@ class BulletinController extends Controller
         $totaux = array();
         $recap = 0;
         $periodes = $this->periodeRepo->findAll();
-//        $pemps = array();
         $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
 
         foreach ($periodes as $per){
@@ -614,6 +613,9 @@ class BulletinController extends Controller
         }
 
         $recap = round($recap, 1);
+        $userDecisions = $this->periodeEleveDecisionRepo->findBy(
+            array('user' => $eleve->getId(), 'periode' => $periode->getId())
+        );
 
         $params = array(
             'pemps' => $pemps,
@@ -621,7 +623,8 @@ class BulletinController extends Controller
             'periode' => $periode,
             'totaux' => $totaux,
             'totauxMatieres' => $totauxMatieres,
-            'recap' => $recap
+            'recap' => $recap,
+            'userDecisions' => $userDecisions
         );
 
         return $this->render('LaurentBulletinBundle::Templates/FinalExamPrint.html.twig', $params);
