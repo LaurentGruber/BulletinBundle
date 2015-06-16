@@ -99,6 +99,11 @@ class PeriodeEleveDecision
         $this->decision = $decision;
     }
 
+    public function getMatieres()
+    {
+        return $this->matieres->toArray();
+    }
+
     public function addMatiere(Matiere $matiere)
     {
         if (!$this->matieres->contains($matiere)) {

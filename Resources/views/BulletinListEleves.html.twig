@@ -17,6 +17,15 @@
                 <td><a href="{{ path ('laurentBulletinPrintEleve', {'periode' : periode.id(), 'eleve' : eleve.id()}) }}">Voir Bulletin officiel</a></td>
                 <td><a href="{{ path('laurentBulletinPrintElevePdf', {'periode' : periode.id(), 'user' : eleve.id()}) }}">Imprimer le bulletin</a> </td>
                 <td><a href="{{ path ('laurentBulletinShowEleveDataChart', {'eleve' : eleve.id()}) }}">Évolution</a> </td>
+                
+                {% if periode.getOnlyPoint() %}
+                    <td>
+                        <a href="{{ path ('laurentBulletinUserDecisionsList', {'user' : eleve.getId(), 'periode': periode.getId()}) }}">
+                            <i class="fa fa-cogs"></i>
+                            Décisions
+                        </a>
+                    </td>
+                {% endif %}
             </tr>
         {% endfor %}
         </table>

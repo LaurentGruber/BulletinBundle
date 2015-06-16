@@ -24,6 +24,7 @@ use Laurent\BulletinBundle\Entity\PeriodeEleveMatierePoint;
 use Laurent\BulletinBundle\Entity\PeriodeElevePointDiversPoint;
 use Laurent\BulletinBundle\Form\Admin\PeriodeType;
 use Laurent\BulletinBundle\Form\Admin\DecisionType;
+use Laurent\BulletinBundle\Form\Admin\UserDecisionType;
 use Claroline\CoreBundle\Entity\Group;
 use Claroline\CoreBundle\Entity\User;
 
@@ -50,6 +51,7 @@ class BulletinAdminController extends Controller
     /** @var PeriodeElevePointDiversPointRepository */
     private $pemdRepo;
     private $decisionRepo;
+    private $periodeEleveDecisionRepo;
     private $om;
     private $em;
     /** @var  string */
@@ -101,6 +103,7 @@ class BulletinAdminController extends Controller
         $this->pempRepo           = $om->getRepository('LaurentBulletinBundle:PeriodeEleveMatierePoint');
         $this->pemdRepo           = $om->getRepository('LaurentBulletinBundle:PeriodeElevePointDiversPoint');
         $this->decisionRepo       = $om->getRepository('LaurentBulletinBundle:Decision');
+        $this->periodeEleveDecisionRepo = $om->getRepository('LaurentBulletinBundle:PeriodeEleveDecision');
     }
 
     /**
@@ -742,6 +745,139 @@ class BulletinAdminController extends Controller
      * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
      */
     public function decisionDeleteAction(Decision $decision)
+    {
+        $this->checkOpen();
+        $this->om->remove($decision);
+        $this->om->flush();
+
+        return new JsonResponse('success', 200);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/user/{user}/periode/{periode}/decisions/list",
+     *     name="laurentBulletinUserDecisionsList",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("LaurentBulletinBundle::Admin/userDecisionsList.html.twig")
+     */
+    public function userDecisionsListAction(User $user, Periode $periode)
+    {
+        $this->checkOpen();
+        $userDecisions = $this->periodeEleveDecisionRepo->findBy(
+            array('user' => $user->getId(), 'periode' => $periode->getId())
+        );
+
+        return array('user' => $user, 'periode' => $periode, 'userDecisions' => $userDecisions);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/user/{user}/periode/{periode}/decision/create/form",
+     *     name="laurentBulletinUserDecisionCreateFrom",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("LaurentBulletinBundle::Admin/userDecisionCreateModalForm.html.twig")
+     */
+    public function userDecisionCreateFormAction(User $user, Periode $periode)
+    {
+        $this->checkOpen();
+        $form = $this->formFactory->create(new UserDecisionType(), new PeriodeEleveDecision());
+
+        return array(
+            'form' => $form->createView(),
+            'user' => $user,
+            'periode' => $periode
+        );
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/user/{user}/periode/{periode}/decision/create",
+     *     name="laurentBulletinUserDecisionCreate",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("LaurentBulletinBundle::Admin/userDecisionCreateModalForm.html.twig")
+     */
+    public function userDecisionCreateAction(User $user, Periode $periode)
+    {
+        $this->checkOpen();
+        $periodeEleveDecision = new PeriodeEleveDecision();
+        $form = $this->formFactory->create(new UserDecisionType(), $periodeEleveDecision);
+        $form->handleRequest($this->request);
+
+        if ($form->isValid()) {
+            $periodeEleveDecision->setUser($user);
+            $periodeEleveDecision->setPeriode($periode);
+            $this->om->persist($periodeEleveDecision);
+            $this->om->flush();
+
+            return new JsonResponse('success', 200);
+        } else {
+
+            return array(
+                'form' => $form->createView(),
+                'user' => $user,
+                'periode' => $periode
+            );
+        }
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/user/decision/{decision}/edit/form",
+     *     name="laurentBulletinUserDecisionEditFrom",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("LaurentBulletinBundle::Admin/userDecisionEditModalForm.html.twig")
+     */
+    public function userDecisionEditFormAction(PeriodeEleveDecision $decision)
+    {
+        $this->checkOpen();
+        $form = $this->formFactory->create(new UserDecisionType(), $decision);
+
+        return array('form' => $form->createView(), 'decision' => $decision);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/user/decision/{decision}/edit",
+     *     name="laurentBulletinUserDecisionEdit",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("LaurentBulletinBundle::Admin/userDecisionEditModalForm.html.twig")
+     */
+    public function userDecisionEditAction(PeriodeEleveDecision $decision)
+    {
+        $this->checkOpen();
+        $form = $this->formFactory->create(new UserDecisionType(), $decision);
+        $form->handleRequest($this->request);
+
+        if ($form->isValid()) {
+            $this->om->persist($decision);
+            $this->om->flush();
+
+            return new JsonResponse('success', 200);
+        } else {
+
+            return array('form' => $form->createView(), 'decision' => $decision);
+        }
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/user/decision/{decision}/delete",
+     *     name="laurentBulletinUserDecisionDelete",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     */
+    public function userDecisionDeleteAction(PeriodeEleveDecision $decision)
     {
         $this->checkOpen();
         $this->om->remove($decision);
