@@ -2,8 +2,11 @@
 
 namespace Laurent\BulletinBundle\Controller;
 
+use Symfony\Component\Form\FormFactory;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as EXT;
 use JMS\DiExtraBundle\Annotation as DI;
@@ -14,10 +17,13 @@ use Claroline\CoreBundle\Persistence\ObjectManager;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Laurent\BulletinBundle\Entity\Decision;
 use Laurent\BulletinBundle\Entity\Periode;
+use Laurent\BulletinBundle\Entity\PeriodeEleveDecision;
 use Laurent\BulletinBundle\Entity\PeriodeEleveMatierePoint;
 use Laurent\BulletinBundle\Entity\PeriodeElevePointDiversPoint;
 use Laurent\BulletinBundle\Form\Admin\PeriodeType;
+use Laurent\BulletinBundle\Form\Admin\DecisionType;
 use Claroline\CoreBundle\Entity\Group;
 use Claroline\CoreBundle\Entity\User;
 
@@ -43,10 +49,13 @@ class BulletinAdminController extends Controller
     private $pempRepo;
     /** @var PeriodeElevePointDiversPointRepository */
     private $pemdRepo;
+    private $decisionRepo;
     private $om;
     private $em;
     /** @var  string */
     private $pdfDir;
+    private $formFactory;
+    private $request;
 
     /**
      * @DI\InjectParams({
@@ -56,10 +65,11 @@ class BulletinAdminController extends Controller
      *      "userManager"        = @DI\Inject("claroline.manager.user_manager"),
      *      "om"                 = @DI\Inject("claroline.persistence.object_manager"),
      *      "em"                 = @DI\Inject("doctrine.orm.entity_manager"),
-     *      "pdfDir"             = @DI\Inject("%laurent.directories.pdf%")
+     *      "pdfDir"             = @DI\Inject("%laurent.directories.pdf%"),
+     *      "formFactory"        = @DI\Inject("form.factory"),
+     *      "requestStack"       = @DI\Inject("request_stack")
      * })
      */
-
     public function __construct(
         AuthorizationCheckerInterface $authorization,
         ToolManager $toolManager,
@@ -67,7 +77,9 @@ class BulletinAdminController extends Controller
         UserManager $userManager,
         ObjectManager $om,
         EntityManager $em,
-        $pdfDir
+        $pdfDir,
+        FormFactory $formFactory,
+        RequestStack $requestStack
     )
     {
         $this->authorization      = $authorization;
@@ -75,6 +87,8 @@ class BulletinAdminController extends Controller
         $this->roleManager        = $roleManager;
         $this->userManager        = $userManager;
         $this->pdfDir             = $pdfDir;
+        $this->formFactory        = $formFactory;
+        $this->request            = $requestStack->getCurrentRequest();
 
         $this->om                 = $om;
         $this->em                 = $em;
@@ -86,7 +100,7 @@ class BulletinAdminController extends Controller
         $this->periodeRepo        = $om->getRepository('LaurentBulletinBundle:Periode');
         $this->pempRepo           = $om->getRepository('LaurentBulletinBundle:PeriodeEleveMatierePoint');
         $this->pemdRepo           = $om->getRepository('LaurentBulletinBundle:PeriodeElevePointDiversPoint');
-
+        $this->decisionRepo       = $om->getRepository('LaurentBulletinBundle:Decision');
     }
 
     /**
@@ -613,6 +627,127 @@ class BulletinAdminController extends Controller
             }
         }
         return array('form' => $form->createView(), 'action' => $this->generateUrl('laurentBulletinPeriodeEdit', array('periode' => $periode->getId())));
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/decisions/list",
+     *     name="laurentBulletinDecisionsList",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("LaurentBulletinBundle::Admin/decisionsList.html.twig")
+     */
+    public function decisionsListAction()
+    {
+        $this->checkOpen();
+        $decisions = $this->decisionRepo->findAll();
+
+        return array('decisions' => $decisions);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/decision/create/form",
+     *     name="laurentBulletinDecisionCreateFrom",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("LaurentBulletinBundle::Admin/decisionCreateModalForm.html.twig")
+     */
+    public function decisionCreateFormAction()
+    {
+        $this->checkOpen();
+        $form = $this->formFactory->create(new DecisionType(), new Decision());
+
+        return array('form' => $form->createView());
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/decision/create",
+     *     name="laurentBulletinDecisionCreate",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("LaurentBulletinBundle::Admin/decisionCreateModalForm.html.twig")
+     */
+    public function decisionCreateAction()
+    {
+        $this->checkOpen();
+        $decision = new Decision();
+        $form = $this->formFactory->create(new DecisionType(), $decision);
+        $form->handleRequest($this->request);
+
+        if ($form->isValid()) {
+            $this->om->persist($decision);
+            $this->om->flush();
+
+            return new JsonResponse('success', 200);
+        } else {
+
+            return array('form' => $form->createView());
+        }
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/decision/{decision}/edit/form",
+     *     name="laurentBulletinDecisionEditFrom",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("LaurentBulletinBundle::Admin/decisionEditModalForm.html.twig")
+     */
+    public function decisionEditFormAction(Decision $decision)
+    {
+        $this->checkOpen();
+        $form = $this->formFactory->create(new DecisionType(), $decision);
+
+        return array('form' => $form->createView(), 'decision' => $decision);
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/decision/{decision}/edit",
+     *     name="laurentBulletinDecisionEdit",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("LaurentBulletinBundle::Admin/decisionEditModalForm.html.twig")
+     */
+    public function decisionEditAction(Decision $decision)
+    {
+        $this->checkOpen();
+        $form = $this->formFactory->create(new DecisionType(), $decision);
+        $form->handleRequest($this->request);
+
+        if ($form->isValid()) {
+            $this->om->persist($decision);
+            $this->om->flush();
+
+            return new JsonResponse('success', 200);
+        } else {
+
+            return array('form' => $form->createView(), 'decision' => $decision);
+        }
+    }
+
+    /**
+     * @EXT\Route(
+     *     "/admin/decision/{decision}/delete",
+     *     name="laurentBulletinDecisionDelete",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     */
+    public function decisionDeleteAction(Decision $decision)
+    {
+        $this->checkOpen();
+        $this->om->remove($decision);
+        $this->om->flush();
+
+        return new JsonResponse('success', 200);
     }
 
     private function checkOpen()
