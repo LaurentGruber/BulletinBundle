@@ -8,12 +8,12 @@
             <table class="table table-bordered table-striped">
                 <tr>
                     {% for totaux in totauxMatieresCeb %}
-                        {% if loop.index0 > 0 and loop.index0 is divisible by(2) %}
+                        {% if loop.index0 > 0 and loop.index0 is divisible by(3) %}
                             </tr>
                             <tr>
                         {% endif %}
                         <td style="background-color: {{ totaux['color'] }}">
-                            <b>{{ totaux['name'] }}</b>
+                            <b class="small">{{ totaux['name'] }}</b>
                         </td>
                     {% endfor %}
                 </tr>
@@ -26,12 +26,12 @@
             <table class="table table-bordered table-striped">
                 <tr>
                     {% for totaux in totauxMatieresNoCeb %}
-                        {% if loop.index0 > 0 and loop.index0 is divisible by(2) %}
+                        {% if loop.index0 > 0 and loop.index0 is divisible by(3) %}
                             </tr>
                             <tr>
                         {% endif %}
                         <td style="background-color: {{ totaux['color'] }}">
-                            <b>{{ totaux['name'] }}</b>
+                            <b class="small">{{ totaux['name'] }}</b>
                         </td>       
                     {% endfor %}
                 </tr>

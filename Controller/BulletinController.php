@@ -494,7 +494,6 @@ class BulletinController extends Controller
      */
     public function printableBulletinWidgetAction(User $user)
     {
-
         $totauxMatieres = $this->totauxManager->getTotalPeriodesMatiere($user);
         $periodes = $this->periodeRepo->findAll();
 
