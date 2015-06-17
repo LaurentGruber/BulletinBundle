@@ -3,8 +3,12 @@
         <table class="table table-bordered table-striped">
             {% for points in pointsDivers %}
                 <tr>
-                    <td>{{ points['name'] }}</td>
-                    <td>{{ points['value'] }}</td>
+                    <td {% if points['withTotal'] and (points['points'] < (points['total'] / 2)) %}style="background-color: #F74747"{% endif %}>
+                        {{ points['name'] }}
+                    </td>
+                    <td {% if points['withTotal'] and (points['points'] < (points['total'] / 2)) %}style="background-color: #F74747"{% endif %}>
+                        {{ points['value'] }}
+                    </td>
                 </tr>
             {% endfor %}
         </table>
