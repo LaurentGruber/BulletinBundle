@@ -130,7 +130,7 @@
                                 <li>
                                     {{ decision.getContent() }}
 
-                                    {% if matieres|length > 0 %}
+                                    {% if decision.getWithMatiere() and matieres|length > 0 %}
                                         {% for matiere in matieres %}
                                             {{ matiere.getOfficialName() }}{% if not loop.last %},{% endif %}
                                         {% endfor %}

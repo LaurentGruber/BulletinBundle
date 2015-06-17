@@ -7,7 +7,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
-class UserDecisionType extends AbstractType
+class UserDecisionCreateType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
@@ -26,24 +26,6 @@ class UserDecisionType extends AbstractType
                 'property' => 'content',
                 'multiple' => false,
                 'required' => true
-            )
-        );
-        $builder->add(
-            'matieres',
-            'entity',
-            array(
-                'label' => 'Matières',
-                'class' => 'LaurentSchoolBundle:Matiere',
-                'choice_translation_domain' => true,
-                'query_builder' => function (EntityRepository $er) {
-
-                    return $er->createQueryBuilder('m')
-                        ->orderBy('m.officialName', 'ASC');
-                },
-                'property' => 'officialName',
-                'expanded' => true,
-                'multiple' => true,
-                'required' => false
             )
         );
     }

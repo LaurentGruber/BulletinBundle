@@ -143,7 +143,6 @@ class BulletinController extends Controller
      *     options = {"expose"=true}
      * )
      *
-     *
      * @param Periode $periode
      * @param Group $group
      *
@@ -155,7 +154,28 @@ class BulletinController extends Controller
     {
         $this->checkOpen();
         $eleves = $this->userRepo->findByGroup($group);
-        return array('periode' => $periode, 'eleves' => $eleves, 'group' => $group);
+        $userDecisions = $this->periodeEleveDecisionRepo->findDecisionsByUsersAndPeriode(
+            $eleves,
+            $periode
+        );
+        $decisions = array();
+
+        foreach ($userDecisions as $userDecision) {
+            $userId = $userDecision->getUser()->getId();
+
+            if (!isset($decisions[$userId])) {
+                $decisions[$userId] = 1;
+            } else {
+                $decisions[$userId]++;
+            }
+        }
+
+        return array(
+            'periode' => $periode,
+            'eleves' => $eleves,
+            'group' => $group,
+            'decisions' => $decisions
+        );
     }
 
     /**

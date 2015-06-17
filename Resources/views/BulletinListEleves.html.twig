@@ -2,27 +2,43 @@
 
 {% block section_content %}
     <div class="panel-heading">
-        <span class="pull-right">
-            <a href="{{ path('laurentBulletinDecisionsList') }}">
-                <i class="fa fa-cog"></i>
-            </a>
-        </span>
         <h1>Élèves du group {{ group.getName() }}</h1>
     </div>
     <div class="panel-body">
         <table class="table">
+        {% set periodeId = periode.getId() %}
+            
         {% for eleve in eleves %}
+            {% set eleveId = eleve.getId() %}
             <tr>
-                <td><a href="{{ path ('laurentBulletinEditEleve', {'periode' : periode.id(), 'eleve' : eleve.id()}) }}">{{ eleve.getFirstName() }} {{ eleve.getLastName() }}</a> </td>
-                <td><a href="{{ path ('laurentBulletinPrintEleve', {'periode' : periode.id(), 'eleve' : eleve.id()}) }}">Voir Bulletin officiel</a></td>
-                <td><a href="{{ path('laurentBulletinPrintElevePdf', {'periode' : periode.id(), 'user' : eleve.id()}) }}">Imprimer le bulletin</a> </td>
-                <td><a href="{{ path ('laurentBulletinShowEleveDataChart', {'eleve' : eleve.id()}) }}">Évolution</a> </td>
+                <td>
+                    <a href="{{ path ('laurentBulletinEditEleve', {'periode' : periodeId, 'eleve' : eleveId}) }}">
+                        {{ eleve.getFirstName() }} {{ eleve.getLastName() }}
+                    </a>
+                </td>
+                <td>
+                    <a href="{{ path ('laurentBulletinPrintEleve', {'periode' : periodeId, 'eleve' : eleveId}) }}">
+                        Voir Bulletin officiel
+                    </a>
+                </td>
+                <td>
+                    <a href="{{ path('laurentBulletinPrintElevePdf', {'periode' : periodeId, 'user' : eleveId}) }}">
+                        Imprimer le bulletin
+                    </a>
+                </td>
+                <td>
+                    <a href="{{ path ('laurentBulletinShowEleveDataChart', {'eleve' : eleveId}) }}">
+                        Évolution
+                    </a>
+                </td>
                 
                 {% if periode.getOnlyPoint() %}
                     <td>
-                        <a href="{{ path ('laurentBulletinUserDecisionsList', {'user' : eleve.getId(), 'periode': periode.getId()}) }}">
-                            <i class="fa fa-cogs"></i>
+                        <a href="{{ path ('laurentBulletinUserDecisionsList', {'user' : eleveId, 'periode': periodeId}) }}">
                             Décisions
+                            {% if decisions[eleveId] is defined %}
+                                <span class="badge">{{ decisions[eleveId] }}</span>
+                            {% endif %}
                         </a>
                     </td>
                 {% endif %}

@@ -10,7 +10,13 @@
                 <table class="table">
                     {% for decision in decisions %}
                         <tr>
-                            <td>{{ decision.getContent() }}</td>
+                            <td>
+                                {{ decision.getContent() }}
+                                
+                                {% if decision.getWithMatiere() %}
+                                    [ Liste de matières ]
+                                {% endif %}
+                            </td>
                             <td>
                                 <span class="btn btn-default edit-decision-btn"
                                       data-decision-id="{{ decision.getId() }}"

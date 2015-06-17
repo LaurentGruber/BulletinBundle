@@ -10,7 +10,7 @@ use Laurent\BulletinBundle\Entity\Periode;
 use Laurent\SchoolBundle\Entity\Matiere;
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="Laurent\BulletinBundle\Repository\PeriodeEleveDecisionRepository")
  * @ORM\Table(name="laurent_bulletin_periode_eleve_decision")
  */
 class PeriodeEleveDecision

@@ -24,7 +24,8 @@ use Laurent\BulletinBundle\Entity\PeriodeEleveMatierePoint;
 use Laurent\BulletinBundle\Entity\PeriodeElevePointDiversPoint;
 use Laurent\BulletinBundle\Form\Admin\PeriodeType;
 use Laurent\BulletinBundle\Form\Admin\DecisionType;
-use Laurent\BulletinBundle\Form\Admin\UserDecisionType;
+use Laurent\BulletinBundle\Form\Admin\UserDecisionCreateType;
+use Laurent\BulletinBundle\Form\Admin\UserDecisionEditType;
 use Claroline\CoreBundle\Entity\Group;
 use Claroline\CoreBundle\Entity\User;
 
@@ -784,7 +785,7 @@ class BulletinAdminController extends Controller
     public function userDecisionCreateFormAction(User $user, Periode $periode)
     {
         $this->checkOpen();
-        $form = $this->formFactory->create(new UserDecisionType(), new PeriodeEleveDecision());
+        $form = $this->formFactory->create(new UserDecisionCreateType(), new PeriodeEleveDecision());
 
         return array(
             'form' => $form->createView(),
@@ -806,7 +807,7 @@ class BulletinAdminController extends Controller
     {
         $this->checkOpen();
         $periodeEleveDecision = new PeriodeEleveDecision();
-        $form = $this->formFactory->create(new UserDecisionType(), $periodeEleveDecision);
+        $form = $this->formFactory->create(new UserDecisionCreateType(), $periodeEleveDecision);
         $form->handleRequest($this->request);
 
         if ($form->isValid()) {
@@ -838,7 +839,7 @@ class BulletinAdminController extends Controller
     public function userDecisionEditFormAction(PeriodeEleveDecision $decision)
     {
         $this->checkOpen();
-        $form = $this->formFactory->create(new UserDecisionType(), $decision);
+        $form = $this->formFactory->create(new UserDecisionEditType(), $decision);
 
         return array('form' => $form->createView(), 'decision' => $decision);
     }
@@ -855,7 +856,7 @@ class BulletinAdminController extends Controller
     public function userDecisionEditAction(PeriodeEleveDecision $decision)
     {
         $this->checkOpen();
-        $form = $this->formFactory->create(new UserDecisionType(), $decision);
+        $form = $this->formFactory->create(new UserDecisionEditType(), $decision);
         $form->handleRequest($this->request);
 
         if ($form->isValid()) {
