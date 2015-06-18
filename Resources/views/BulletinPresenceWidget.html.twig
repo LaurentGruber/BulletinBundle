@@ -3,8 +3,12 @@
         <table class="table table-bordered table-striped">
             {% for presence in presences %}
                 <tr>
-                    <td>{{ presence['matiere'] }}</td>
-                    <td>{{ presence['presence'] }} %</td>
+                    <td {% if presence['presence'] < 50 %}style="background-color: #F74747"{% endif %}>
+                        {{ presence['matiere'] }}
+                    </td>
+                    <td {% if presence['presence'] < 50 %}style="background-color: #F74747"{% endif %}>
+                        {{ presence['presence'] }} %
+                    </td>
                 </tr>
             {% endfor %}
         </table>

@@ -53,32 +53,30 @@ class TotauxManager
             }
         }
 
-        $totalPourcentage = round(($totalPoint / $totalTotal) * 100, 1).' %';
+        if ($totalTotal === 0) {
+            $totalPourcentage = '0 %';
+        } else {
+            $totalPourcentage = round(($totalPoint / $totalTotal) * 100, 1).' %';
+        }
 
         return array('totalPoint' => $totalPoint, 'totalTotal' => $totalTotal, 'totalPourcentage' => $totalPourcentage);
     }
 
-    public function getTotalPeriodes(User $eleve){
-        $periodes = array(1, 2, 3);
+    public function getTotalPeriodes(User $eleve)
+    {
+        $periodes = $this->periodeRepo->findAll();
         $totaux = array();
         $nbPeriodes = array();
 
-
-        $periode = $this->periodeRepo->findOneById(3);
-        $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
-
-        foreach ($pemps as $key => $pemp){
-            $totaux[$key] = 0;
-            $nbPeriodes[$key] = 0;
-
-        }
-
-
-        foreach ($periodes as $per){
-            $periode = $this->periodeRepo->findOneById($per);
+        foreach ($periodes as $periode){
             $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
 
             foreach ($pemps as $key => $pemp){
+                if (!isset($totaux[$key])) {
+                    $totaux[$key] = 0;
+                    $nbPeriodes[$key] = 0;
+                }
+
                 if ($pemp->getPourcentage() != 999){
                     $totaux[$key] += $pemp->getPourcentage();
                     $nbPeriodes[$key]++;
@@ -98,18 +96,16 @@ class TotauxManager
         $periodes = $this->periodeRepo->findAll();
         $totaux = array();
         $nbPeriodes = array();
-        $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periodes[0]);
-
-        foreach ($pemps as $key => $pemp) {
-            $totaux[$key] = 0;
-            $nbPeriodes[$key] = 0;
-
-        }
 
         foreach ($periodes as $periode){
             $pemps = $this->pempRepo->findPeriodeEleveMatiere($eleve, $periode);
 
             foreach ($pemps as $key => $pemp){
+                if (!isset($totaux[$key])) {
+                    $totaux[$key] = 0;
+                    $nbPeriodes[$key] = 0;
+                }
+
                 if ($pemp->getPourcentage() != 999){
                     $totaux[$key] += $pemp->getPourcentage();
                     $nbPeriodes[$key]++;
@@ -225,13 +221,16 @@ class TotauxManager
         $pourcPeriode = array();
 
         foreach ($periodes as $periode){
-            if ($this->pempRepo->findPeriodeMatiereEleve($periode, $eleve, $matiere)->getPourcentage() == 999){
+            $pemp = $this->pempRepo->findPeriodeMatiereEleve($periode, $eleve, $matiere);
+
+            if (is_null($pemp) || $pemp->getPourcentage() == 999){
                 $pourcPeriode[] = '';
             } else{
-                $pourcPeriode[] = round($this->pempRepo->findPeriodeMatiereEleve($periode, $eleve, $matiere)->getPourcentage(), 1);
+                $pourcPeriode[] = round($pemp->getPourcentage(), 1);
             }
 
         }
+
         return $pourcPeriode;
     }
 
