@@ -462,9 +462,9 @@ class BulletinController extends Controller
      *
      * @return Response
      */
-    public function showDataChartAction(User $eleve)
+    public function showDataChartAction(Request $request, User $eleve)
     {
-        $this->checkOpen();
+        $this->checkOpenPrintPdf($request);
         $json = $this->totauxManager->getDataChart($eleve, true);
         $jsonNoCeb = $this->totauxManager->getDataChart($eleve, false);
 

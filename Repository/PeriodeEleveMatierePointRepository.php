@@ -37,7 +37,8 @@ class PeriodeEleveMatierePointRepository extends EntityRepository
             ->setParameter('user', $user)
             ->setParameter('matiere', $matiere);
         $query = $qb->getQuery();
-        return $results = $query->getSingleResult();
+
+        return $results = $query->getOneOrNullResult();
     }
 
     public function findPEMPByUserAndNonOnlyPointPeriode(User $user)
