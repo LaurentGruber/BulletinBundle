@@ -839,7 +839,10 @@ class BulletinAdminController extends Controller
     public function userDecisionEditFormAction(PeriodeEleveDecision $decision)
     {
         $this->checkOpen();
-        $form = $this->formFactory->create(new UserDecisionEditType(), $decision);
+        $form = $this->formFactory->create(
+            new UserDecisionEditType($decision, $this->om),
+            $decision
+        );
 
         return array('form' => $form->createView(), 'decision' => $decision);
     }
@@ -856,7 +859,10 @@ class BulletinAdminController extends Controller
     public function userDecisionEditAction(PeriodeEleveDecision $decision)
     {
         $this->checkOpen();
-        $form = $this->formFactory->create(new UserDecisionEditType(), $decision);
+        $form = $this->formFactory->create(
+            new UserDecisionEditType($decision, $this->om),
+            $decision
+        );
         $form->handleRequest($this->request);
 
         if ($form->isValid()) {
